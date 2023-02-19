@@ -12,7 +12,14 @@ def app():
     st.markdown('Get your position from the location of the sun')
     c1,c2 = st.columns((1,3))
     with c1:
-        
+        lu = st.sidebar.text_input('Lookup: ') 
+        if len(lu)>=3:
+            where = zf.lookup(lu)
+            st.sidebar.write(where[0])
+            st.sidebar.write('Lat: '+str(where[1])+' Lon: '+str(where[2]))
+            st.sidebar.write('MGRS: '+where[3])
+            alt = zf.elevation(where[1],where[2])
+            st.sidebar.write('Alt :'+str(round(alt,2))+' Meters')
         setyear = st.number_input('Year: ',1900,2100,2022)
         setmonth = st.number_input('Month: ',1,12,4)
         setday = st.number_input('Day: ',1,31,9)
@@ -35,12 +42,14 @@ def app():
         sslon = ssloc[1]
         st.write('Sub Solar Point: '+str(ssloc)+' MGRS: '+zf.LL2MGRS(sslat,sslon)[1])
         lpmgrs = st.text_input('Your Location (MGRS):','52WDU2497198959')
+        yl = zf.MGRS2LL(lpmgrs)
+        st.write('Your Location (LL): '+str(round(yl[1],5))+', '+str(round(yl[2],5)))
         melat = zf.MGRS2LL(lpmgrs)[1]
         melon = zf.MGRS2LL(lpmgrs)[2]
         
         when = (setday.year,setday.month,setday.day,setday.hour,setday.minute,setday.second,0)
         location = (melat,melon)
-        st.write(zf.sunpos(when, location, True))
+        
         st.write('azimuth to the sun: '+ str(zf.sunpos(when, location, True)[0]))
         st.write('elevation to the sun: '+ str(zf.sunpos(when, location, True)[1]))
        

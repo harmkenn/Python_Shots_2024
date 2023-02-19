@@ -23,6 +23,8 @@ def app():
     with c1:
         
         lpmgrs = st.text_input('Launch Point (MGRS):','12RWU1059022575')
+        lp = zf.MGRS2LL(lpmgrs)
+        st.write('Launch Point (LL): '+str(round(lp[1],5))+', '+str(round(lp[2],5)))
         azmils = st.text_input('Azimuth (mils):',1600)
         dmeters = st.text_input('Direction (meters)',10000)
     
@@ -39,6 +41,7 @@ def app():
             st.write('Impact Azimuth: '+str(round(deets[2]*3200/180,2)) + ' mils')
             ip = zf.LL2MGRS(deets[0],deets[1])
             st.write('Impact Location (MGRS): '+ip[1])
+            st.write('Impact Point (LL): '+str(round(deets[0],5))+', '+str(round(deets[1],5)))
         with c2:
             # map
             map = folium.Map(location=[(lp[1]+deets[0])/2, (lp[2]+deets[1])/2], zoom_start=-1.36*np.log(dmeters/1000)+15)

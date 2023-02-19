@@ -25,14 +25,17 @@ def app():
             st.sidebar.write('Alt :'+str(round(alt,2))+' Meters')
     with c1:
         lpmgrs = st.text_input('Launch Point (MGRS):','12RWU1059022575')
+        lp = zf.MGRS2LL(lpmgrs)
+        st.write('Launch Point (LL): '+str(round(lp[1],5))+', '+str(round(lp[2],5)))
         lpalt = st.text_input('Launch Altitude (M)', 321)
         ipmgrs = st.text_input('Impact Point (MGRS):','12RWU2645019206')
+        ip = zf.MGRS2LL(ipmgrs)
+        st.write('Impact Point (LL): '+str(round(ip[1],5))+', '+str(round(ip[2],5)))
         ipalt = st.text_input('Impact Altitude (M)', 621)
         AOF = st.text_input('Azimuth of Fire', 1200)
         
     if len(lpmgrs)>3 and len(ipmgrs)>3:
-        lp = zf.MGRS2LL(lpmgrs)
-        ip = zf.MGRS2LL(ipmgrs)
+        
         with c1:
             deets = zf.P2P(lp[1],lp[2],ip[1],ip[2])
             st.write('Distance: ' + str(round(deets[2],0)) + ' meters')
