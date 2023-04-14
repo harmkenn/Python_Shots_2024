@@ -6,7 +6,7 @@ sklearn
 folium
 streamlit_folium
 pygeodesy
-sklearn
+# sklearn
 scipy
 plotly.express
 scikit-learn 
