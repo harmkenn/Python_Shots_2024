@@ -14,10 +14,11 @@ def app():
         lat = float(st.text_input('Latitude',-30))
         lon = float(st.text_input('Longitude',30))
         back = zf.LL2MGRS(lat,lon)
+        ip = zf.LL2MGRS(lat+.1,lon+.1)
         st.write('UTM: ',back[0])
         st.write('MGRS: ',back[1])
     with c2:    
-        mgrs = st.text_input('MGRS: ',back[1])
+        mgrs = st.text_input('MGRS: ',ip[1])
         out = zf.MGRS2LL(mgrs)
         st.write('UTM :',out[0])
         st.write('Lat: ',str(round(out[1],4)),' Lon: ',str(round(out[2],4)))
@@ -33,7 +34,7 @@ def app():
     with d1:
         aof = float(st.text_input('Target; Azimuth of Fire (mils): ',2000))
         lpmgrs = st.text_input('Launch Point (MGRS):',back[1])
-        ipmgrs = st.text_input('Impact Point (MGRS):',back[1])
+        ipmgrs = st.text_input('Impact Point (MGRS):',ip[1])
         lp = zf.MGRS2LL(lpmgrs)
         
         ip = zf.MGRS2LL(ipmgrs)
