@@ -34,6 +34,8 @@ def app():
     with d1:
         aof = float(st.text_input('Target; Azimuth of Fire (mils): ',2000))
         lpmgrs = st.text_input('Launch Point (MGRS):',back[1])
+        if 'key' not in st.session_state:
+            st.session_state['key'] = lpmgrs
         ipmgrs = st.text_input('Impact Point (MGRS):',ip[1])
         lp = zf.MGRS2LL(lpmgrs)
         
