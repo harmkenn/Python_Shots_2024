@@ -11,7 +11,10 @@ def app():
     st.markdown('Deflection')
     c1,c2 = st.columns(2)
     with c1:
-        lat = float(st.text_input('Latitude',-30))
+        if 'a_lat' not in st.session_state:
+            st.session_state['a_lat'] = -30
+            lat = st.session_state['a_lat']
+        lat = float(st.text_input('Latitude', lat))
         lon = float(st.text_input('Longitude',30))
         back = zf.LL2MGRS(lat,lon)
         ip = zf.LL2MGRS(lat+.1,lon+.1)
@@ -34,8 +37,8 @@ def app():
     with d1:
         aof = float(st.text_input('Target; Azimuth of Fire (mils): ',2000))
         lpmgrs = st.text_input('Launch Point (MGRS):',back[1])
-        if 'key' not in st.session_state:
-            st.session_state['key'] = lpmgrs
+
+
         ipmgrs = st.text_input('Impact Point (MGRS):',ip[1])
         lp = zf.MGRS2LL(lpmgrs)
         
