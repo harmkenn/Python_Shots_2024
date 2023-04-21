@@ -11,10 +11,10 @@ def app():
     st.markdown('Deflection')
     c1,c2 = st.columns(2)
     with c1:
-        if 'a_lat' not in st.session_state: st.session_state.a_lat = -30
-        lat = st.session_state.a_lat
+        if 'a_lat' not in st.session_state: st.session_state['a_lat'] = -30
+        lat = st.session_state['a_lat']
         lat = float(st.text_input('Latitude', lat))
-        st.session_state.a_lat = lat
+        st.session_state['a_lat'] = lat
         lon = float(st.text_input('Longitude',30))
         back = zf.LL2MGRS(lat,lon)
         ip = zf.LL2MGRS(lat+.1,lon+.1)
