@@ -15,7 +15,10 @@ def app():
         lat = st.session_state['a_lat']
         lat = float(st.text_input('Latitude', lat))
         st.session_state['a_lat'] = lat
-        lon = float(st.text_input('Longitude',30))
+        if 'a_lon' not in st.session_state: st.session_state['a_lon'] = 30
+        lon = st.session_state['a_lon']
+        lon = float(st.text_input('Longitude', lon))
+        st.session_state['a_lon'] = lon
         back = zf.LL2MGRS(lat,lon)
         ip = zf.LL2MGRS(lat+.1,lon+.1)
         st.write('UTM: ',back[0])
