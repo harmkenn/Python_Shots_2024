@@ -9,7 +9,7 @@ from apps import z_functions as zf
 def app():
     # title of the app
     st.markdown('Deflection')
-    c1,c2 = st.columns(2)
+    c1,c2 = st.columns((1,2))
     with c1:
         if 'a_lat' not in st.session_state: st.session_state['a_lat'] = -30
         lat = st.session_state['a_lat']
@@ -24,10 +24,7 @@ def app():
         st.write('UTM: ',back[0])
         st.write('MGRS: ',back[1])
     with c2:    
-        mgrs = st.text_input('MGRS: ',ip[1])
-        out = zf.MGRS2LL(mgrs)
-        st.write('UTM :',out[0])
-        st.write('Lat: ',str(round(out[1],4)),' Lon: ',str(round(out[2],4)))
+               
         lu = st.sidebar.text_input('Lookup: ') 
         if len(lu)>=3:
             where = zf.lookup(lu)
@@ -36,17 +33,29 @@ def app():
             st.sidebar.write('MGRS: '+where[3])
             alt = zf.elevation(where[1],where[2])
             st.sidebar.write('Alt :'+str(round(alt,2))+' Meters')
-    d1,d2 = st.columns((1,2))
-    with d1:
-        aof = float(st.text_input('Target; Azimuth of Fire (mils): ',2000))
-        lpmgrs = st.text_input('Launch Point (MGRS):',back[1])
-
-
-        ipmgrs = st.text_input('Impact Point (MGRS):',ip[1])
+            
+    with c1:
+        if 'a_aof' not in st.session_state: st.session_state['a_aof'] = 2000
+        aof = st.session_state['a_aof']
+        aof = float(st.text_input('Azimuth of Fire (mils): ',aof))
+        st.session_state['a_aof'] = aof
+        
+        if 'a_lpmgrs' not in st.session_state: st.session_state['a_lpmgrs'] = back[1]
+        lpmgrs = st.session_state['a_lpmgrs']
+        lpmgrs = st.text_input('Launch Point (MGRS):',lpmgrs)
+        st.session_state['a_lpmgrs'] = lpmgrs
+        
+        if 'a_ipmgrs' not in st.session_state: st.session_state['a_ipmgrs'] = ip[1]
+        ipmgrs = st.session_state['a_ipmgrs']
+        ipmgrs = st.text_input('Impact Point (MGRS):',ipmgrs)
+        st.session_state['a_ipmgrs'] = ipmgrs
+        
         lp = zf.MGRS2LL(lpmgrs)
         
         ip = zf.MGRS2LL(ipmgrs)
-    with d2:
+        st.write('UTM :',ip[0])
+        st.write('Lat: ',str(round(ip[1],4)),' Lon: ',str(round(ip[2],4)))
+    with c2:
         # map
         map = folium.Map(location=[lp[1], lp[2]], zoom_start=10)
         # add tiles to map
@@ -110,7 +119,7 @@ def app():
         # display map
         folium_static(map) 
         
-        with d1:
+        with c2:
             deets = zf.P2P(lp[1],lp[2],ip[1],ip[2])
             st.write('Distance: ' + str(round(deets[2],0)) + ' meters')
             st.write('Bearing: '+str(round(deets[0],2)) + ' degrees')

@@ -22,14 +22,19 @@ def app():
             st.sidebar.write('Alt :'+str(round(alt,2))+' Meters')
     with c1:
         
-        lpmgrs = st.text_input('Launch Point (MGRS):','12RWU1059022575')
-        lp = zf.MGRS2LL(lpmgrs)
+        if 'c_lpmgrs' not in st.session_state: st.session_state['c_lpmgrs'] = '12RWU1059022575'
+        c_lpmgrs = st.session_state['c_lpmgrs']
+        c_lpmgrs = st.text_input('Launch Point (MGRS):',c_lpmgrs, key = 'c1')
+        st.session_state['c_lpmgrs'] = c_lpmgrs
+        
+        lp = zf.MGRS2LL(c_lpmgrs)
         st.write('Launch Point (LL): '+str(round(lp[1],5))+', '+str(round(lp[2],5)))
+        
         azmils = st.text_input('Azimuth (mils):',1600)
-        dmeters = st.text_input('Direction (meters)',10000)
+        dmeters = st.text_input('Distance (meters)',10000)
     
-    if len(lpmgrs)>3 and len(azmils)>1:
-        lp = zf.MGRS2LL(lpmgrs)
+    if len(c_lpmgrs)>3 and len(azmils)>1:
+        lp = zf.MGRS2LL(c_lpmgrs)
         azdeg = float(azmils)*180/3200
         dmeters = float(dmeters)
         with c1:
@@ -89,7 +94,7 @@ def app():
             # add marker to map https://fontawesome.com/v5.15/icons?d=gallery&p=2&m=free
             pal = folium.features.CustomIcon('Icons/paladin.jpg',icon_size=(30,20))
             tgt = folium.features.CustomIcon('Icons/target.png',icon_size=(25,25))
-            folium.Marker(location=[lp[1],lp[2]], color='green',popup=lpmgrs, tooltip='Launch Point',icon=pal).add_to(map)
+            folium.Marker(location=[lp[1],lp[2]], color='green',popup=c_lpmgrs, tooltip='Launch Point',icon=pal).add_to(map)
             folium.Marker(location=[deets[0],deets[1]], color='green',popup=ip[1], tooltip='Impact Point',icon=tgt).add_to(map)
             
 

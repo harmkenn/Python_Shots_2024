@@ -21,15 +21,22 @@ def app():
             alt = zf.elevation(where[1],where[2])
             st.sidebar.write('Alt :'+str(round(alt,2))+' Meters')
     with c1:
-        
-        lpmgrs = st.text_input('Launch Point (MGRS):','12RWU1059022575')
-        lp = zf.MGRS2LL(lpmgrs)
+        if 'b_lpmgrs' not in st.session_state: st.session_state['b_lpmgrs'] = '12RWU1059022575'
+        b_lpmgrs = st.session_state['b_lpmgrs']
+        b_lpmgrs = st.text_input('Launch Point (MGRS):',b_lpmgrs, key = "b1")
+        st.session_state['b_lpmgrs'] = b_lpmgrs
+        lp = zf.MGRS2LL(b_lpmgrs)
         st.write('Launch Point (LL): '+str(round(lp[1],5))+', '+str(round(lp[2],5)))
-        ipmgrs = st.text_input('Impact Point (MGRS):','12RWU9645019206')
+        
+        if 'b_ipmgrs' not in st.session_state: st.session_state['b_ipmgrs'] = '12RWU9645019206'
+        ipmgrs = st.session_state['b_ipmgrs']
+        ipmgrs = st.text_input('Impact Point (MGRS):',ipmgrs,key = 'b2')
+        st.session_state['b_ipmgrs'] = ipmgrs
+        
         ip = zf.MGRS2LL(ipmgrs)
         st.write('Impact Point (LL): '+str(round(ip[1],5))+', '+str(round(ip[2],5)))
     
-    if len(lpmgrs)>3 and len(ipmgrs)>3:
+    if len(b_lpmgrs)>3 and len(ipmgrs)>3:
         
         
         with c1:
@@ -86,7 +93,7 @@ def app():
             # add marker to map https://fontawesome.com/v5.15/icons?d=gallery&p=2&m=free
             pal = folium.features.CustomIcon('Icons/paladin.jpg',icon_size=(30,20))
             tgt = folium.features.CustomIcon('Icons/target.png',icon_size=(25,25))
-            folium.Marker(location=[lp[1],lp[2]], color='green',popup=lpmgrs, tooltip='Launch Point',icon=pal).add_to(map)
+            folium.Marker(location=[lp[1],lp[2]], color='green',popup=b_lpmgrs, tooltip='Launch Point',icon=pal).add_to(map)
             folium.Marker(location=[ip[1],ip[2]], color='green',popup=ipmgrs, tooltip='Impact Point',icon=tgt).add_to(map)
             
 
