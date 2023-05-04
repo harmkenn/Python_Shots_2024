@@ -15,10 +15,26 @@ def app():
     st.markdown('Artillery Physics')
     c1,c2 = st.columns((1,3))
     with c1:
-        galt = float(st.text_input('Gun Altitude (Meters):',700))
-        imv = float(st.text_input('Initial Muzzle Velocity (m/s):',500))
-        qe = float(st.text_input('Tube Elevation (mils):',250))
-        sw = float(st.text_input('Shell Weight (lbs):',103.5))
+        if 'galt' not in st.session_state: st.session_state['galt'] = 700
+        galt = st.session_state['galt']
+        galt = float(st.text_input('Gun Altitude (Meters):',galt, key = 'e1'))
+        st.session_state['galt'] = galt 
+
+        if 'imv' not in st.session_state: st.session_state['imv'] = 500
+        imv = st.session_state['imv']
+        imv = float(st.text_input('Initial Muzzle Velocity (m/s):',imv, key = 'e2'))
+        st.session_state['imv'] = imv 
+
+        if 'qe' not in st.session_state: st.session_state['qe'] = 250
+        qe = st.session_state['qe']
+        qe = float(st.text_input('Tube Elevation (mils):',qe, key = 'e3'))
+        st.session_state['qe'] = qe 
+
+        if 'sw' not in st.session_state: st.session_state['sw'] = 103.5
+        sw = st.session_state['sw']
+        sw = float(st.text_input('Shell Weight (lbs):',sw, key = 'e4'))
+        st.session_state['sw'] = sw 
+
         m = sw/2.20462 #mass lbs to kg
         th0 = qe * np.pi / 3200 # initial angle in radians
         g = 9.80665 # gravitational force in m/s/s

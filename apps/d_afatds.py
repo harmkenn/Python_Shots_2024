@@ -24,17 +24,38 @@ def app():
             alt = zf.elevation(where[1],where[2])
             st.sidebar.write('Alt :'+str(round(alt,2))+' Meters')
     with c1:
-        lpmgrs = st.text_input('Launch Point (MGRS):','12RWU1059022575')
-        lp = zf.MGRS2LL(lpmgrs)
-        st.write('Launch Point (LL): '+str(round(lp[1],5))+', '+str(round(lp[2],5)))
-        lpalt = st.text_input('Launch Altitude (M)', 321)
-        ipmgrs = st.text_input('Impact Point (MGRS):','12RWU2645019206')
-        ip = zf.MGRS2LL(ipmgrs)
-        st.write('Impact Point (LL): '+str(round(ip[1],5))+', '+str(round(ip[2],5)))
-        ipalt = st.text_input('Impact Altitude (M)', 621)
-        AOF = st.text_input('Azimuth of Fire', 1200)
+        if 'd_lpmgrs' not in st.session_state: st.session_state['d_lpmgrs'] = '12RWU1059022575'
+        d_lpmgrs = st.session_state['d_lpmgrs']
+        d_lpmgrs = st.text_input('Launch Point (MGRS):',d_lpmgrs, key = 'd1')
+        st.session_state['d_lpmgrs'] = d_lpmgrs
         
-    if len(lpmgrs)>3 and len(ipmgrs)>3:
+        lp = zf.MGRS2LL(d_lpmgrs)
+        st.write('Launch Point (LL): '+str(round(lp[1],5))+', '+str(round(lp[2],5)))
+
+        if 'd_lpalt' not in st.session_state: st.session_state['d_lpalt'] = 321
+        d_lpalt = st.session_state['d_lpalt']
+        d_lpalt = st.text_input('Launch Altitude (M):',d_lpalt, key = 'd3')
+        st.session_state['d_lpalt'] = d_lpalt
+
+        if 'd_ipmgrs' not in st.session_state: st.session_state['d_ipmgrs'] = '12RWU2645019206'
+        d_ipmgrs = st.session_state['d_ipmgrs']
+        d_ipmgrs = st.text_input('Imoact Point (MGRS):',d_ipmgrs, key = 'd2')
+        st.session_state['d_ipmgrs'] = d_ipmgrs
+
+        ip = zf.MGRS2LL(d_ipmgrs)
+        st.write('Impact Point (LL): '+str(round(ip[1],5))+', '+str(round(ip[2],5)))
+
+        if 'd_ipalt' not in st.session_state: st.session_state['d_ipalt'] = 621
+        d_ipalt = st.session_state['d_ipalt']
+        d_ipalt = st.text_input('Impact Altitude (M):',d_ipalt, key = 'd4')
+        st.session_state['d_ipalt'] = d_ipalt
+
+        if 'd_AOF' not in st.session_state: st.session_state['d_AOF'] = 1200
+        d_AOF = st.session_state['d_AOF']
+        d_AOF = st.text_input('Azimuth of Fire (mils):',d_AOF, key = 'd5')
+        st.session_state['d_AOF'] = d_AOF 
+        
+    if len(d_lpmgrs)>3 and len(d_ipmgrs)>3:
         
         with c1:
             deets = zf.P2P(lp[1],lp[2],ip[1],ip[2])
@@ -90,8 +111,8 @@ def app():
             # add marker to map https://fontawesome.com/v5.15/icons?d=gallery&p=2&m=free
             pal = folium.features.CustomIcon('Icons/paladin.jpg',icon_size=(30,20))
             tgt = folium.features.CustomIcon('Icons/target.png',icon_size=(25,25))
-            folium.Marker(location=[lp[1],lp[2]], color='green',popup=lpmgrs, tooltip='Launch Point',icon=pal).add_to(map)
-            folium.Marker(location=[ip[1],ip[2]], color='green',popup=ipmgrs, tooltip='Impact Point',icon=tgt).add_to(map)
+            folium.Marker(location=[lp[1],lp[2]], color='green',popup=d_lpmgrs, tooltip='Launch Point',icon=pal).add_to(map)
+            folium.Marker(location=[ip[1],ip[2]], color='green',popup=d_ipmgrs, tooltip='Impact Point',icon=tgt).add_to(map)
             
 
             
@@ -118,13 +139,13 @@ def app():
                 chrg = pd.cut([rng], bins=[-1,2000,5000,8000,11000,14000,25000,99999999], labels=['Too Short','M231 1L','M231 2L','M232A1 3H','M232A1 4H','M232A1 5H','Too Far'])
                 chrg = chrg[0]
             st.write(chrg)
-            ning = int(lpmgrs[-5:])
+            ning = int(d_lpmgrs[-5:])
             if ning > 1000:
                 ring = ning - 1000
-                sp = lpmgrs[:-5]+str(ring).rjust(5, "0")
+                sp = d_lpmgrs[:-5]+str(ring).rjust(5, "0")
             else:
                 ring = ning + 1000
-                sp = lpmgrs[:-5]+str(ring).rjust(5, "0")
+                sp = d_lpmgrs[:-5]+str(ring).rjust(5, "0")
             spll = zf.MGRS2LL(sp)
             gd = zf.P2P(spll[1],spll[2],lp[1],lp[2])
             gdm = gd[0]/180*3200
@@ -140,12 +161,12 @@ def app():
             DriftM.fit(macs[['Range']],macs['Drift'])
             drift = DriftM.predict([[rng]])[0]
             az = deets[0]*3200/180
-            defl = 3200 - az + float(AOF) + drift + gdm
+            defl = 3200 - az + float(d_AOF) + drift + gdm
             mv = macs.iloc[1,1]
             ElevM = ElasticNet()
             ElevM.fit(macs[['Range']],macs['Elev'])
             elev = ElevM.predict([[rng]])[0]
-            vi = int(ipalt)-int(lpalt)
+            vi = int(d_ipalt)-int(d_lpalt)
             AOSm = np.arctan(vi/rng)*3200/np.pi
             CSF = 0
             if vi > 0:
@@ -179,7 +200,7 @@ def app():
 
         with c2:
             
-            tPoints = pd.DataFrame({'Ranges':[0,.57*CR,.58*CR,rng],'Alts':[int(lpalt),MO,MO,int(ipalt)]})
+            tPoints = pd.DataFrame({'Ranges':[0,.57*CR,.58*CR,rng],'Alts':[int(d_lpalt),MO,MO,int(d_ipalt)]})
             x, y = tPoints['Ranges'], tPoints['Alts']
             model5 = np.poly1d(np.polyfit(x, y, 5))
             x_traj = np.arange(0, int(rng), 100)
