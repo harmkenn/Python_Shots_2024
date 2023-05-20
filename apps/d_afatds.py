@@ -8,6 +8,9 @@ from sklearn.linear_model import ElasticNet
 from scipy.optimize import curve_fit
 import plotly.express as px
 from apps import z_functions as zf
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import r2_score
 
 def app():
     # title of the app
