@@ -9,8 +9,7 @@ from scipy.optimize import curve_fit
 import plotly.express as px
 from apps import z_functions as zf
 from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score
+from sklearn.preprocessing import PolynomialFeatures
 
 def app():
     # title of the app
@@ -139,11 +138,11 @@ def app():
             folium_static(map) 
         with c3:
             rng = round(deets[2],0)
-            chrg = st.selectbox('Charge:',['Auto','M231 1L','M231 2L','M232A1 3H','M232A1 4H','M232A1 5H'])
+            chrg = st.selectbox('Charge:',['Auto','1L','2L','3H','4H','5H'])
             if chrg == 'Auto':
-                chrg = pd.cut([rng], bins=[-1,2000,5000,8000,11000,14000,25000,99999999], labels=['Too Short','M231 1L','M231 2L','M232A1 3H','M232A1 4H','M232A1 5H','Too Far'])
+                chrg = pd.cut([rng], bins=[-1,2000,5000,8000,11000,14000,25000,99999999], labels=['Too Short','1L','2L','3H','4H','5H','Too Far'])
                 chrg = chrg[0]
-            st.write(chrg)
+
             ning = int(d_lpmgrs[-5:])
             if ning > 1000:
                 ring = ning - 1000
@@ -153,65 +152,76 @@ def app():
                 sp = d_lpmgrs[:-5]+str(ring).rjust(5, "0")
             spll = zf.MGRS2LL(sp)
             gd = zf.P2P(spll[1],spll[2],lp[1],lp[2])
+
             gdm = gd[0]/180*3200
             if gdm > 4800:
                 gdm = gdm - 6400
             if gdm > 1600:
                 gdm = gdm - 3200
-            macs = pd.read_csv('data/M795Macs.csv',encoding = 'latin1')
-            st.write(macs)
+
+            macs = pd.read_csv('data/M795Macs.csv')
+            
             macs = macs[macs['Chg'].str.contains(chrg[-2:])]
-            #st.write(macs)
-            DriftM = ElasticNet()
-            DriftM.fit(macs[['Range (M)']],macs['Drift'])
-            drift = DriftM.predict([[rng]])[0]
-            az = deets[0]*3200/180
-            defl = 3200 - az + float(d_AOF) + drift + gdm
-            mv = macs.iloc[1,1]
-            #ElevM = ElasticNet()
-            #ElevM.fit(macs[['Range (M)']],macs['Elev'])
-            #elev = ElevM.predict([[rng]])[0]
+            # Load data from CSV file
+            
+            macs['cosAZ'] = np.cos(macs['GTL (mils)']*np.pi/3200)
+            macs = macs.loc[macs['Chg'] == chrg]
+
+            # Extract the feature and target variables
+            X = macs[['Range (M)', 'LAT (deg)', 'cosAZ', 'VI (M)']]
+            y = macs[['Drift', 'QE (mils)', 'TOF', 'MAX Ord (M)']]
+            
+            # transform the input data to include polynomial terms up to degree 3
+            poly = PolynomialFeatures(degree=3, include_bias=False)
+            X_train_poly = poly.fit_transform(X)
+            
+            # create a linear regression model and fit the training data
+            model = LinearRegression()
+            model.fit(X_train_poly, y)
             vi = int(d_ipalt)-int(d_lpalt)
-            #AOSm = np.arctan(vi/rng)*3200/np.pi
-            #CSF = 0
-            #if vi > 0:
-                #CSFM = ElasticNet()
-                #CSFM.fit(macs[['Range (M)']],macs['csf.p'])
-                #CSF = CSFM.predict([[rng]])[0]
-                #CAS = AOSm*CSF
-            #if vi < 0:
-                #CSFM = ElasticNet()
-                #CSFM.fit(macs[['Range (M)']],macs['csf.n'])
-                #CSF = CSFM.predict([[rng]])[0]
-                #CAS = AOSm*CSF*(-1)
-            #sitem = AOSm+CAS
-            QE = elev+sitem
-            tofM = ElasticNet()
-            tofM.fit(macs[['Range (M)']],macs['TOF'])
-            TOF = tofM.predict([[rng]])[0]
-            moM = ElasticNet()
-            moM.fit(macs[['Elev']],macs['Maxord.z'])
-            MO = moM.predict([[QE]])[0]
-            crM = ElasticNet()
-            crM.fit(macs[['Elev']],macs['Range (M)'])
-            CR = crM.predict([[QE]])[0]
-            data = pd.DataFrame({'Range (Meters)':str(int(rng)),'Corrected Range (Meters)':str(int(CR)),'Shell':'M795','Charge':chrg,
-                                 'Azimuth to Target (mils)':str(round(az,1)),
-                                 'Grid Declination (mils)':str(round(gdm,1)),'Drift (mils)':str(round(drift,1)),'Deflection (mils)':str(round(defl,1)),
-                                 'Muzzle Velocity (m/s)':str(mv),'Elevation (mils)':str(round(elev,1)),'AOS (mils)':str(round(AOSm,1)),
-                                 'CAS (mils)':str(round(CAS,1)),'Site (mils)':str(round(sitem,1)),'QE (mils)':str(round(QE,1)),
-                                 'Time of Flight (sec)':str(round(TOF,1)),'MaxOrd (Meters)':str(int(MO))},index = ['Fire Mission']).T 
+            andthis = {'Range (M)':rng, 'LAT (deg)':round(lp[1],5), 'cosAZ':np.cos(round(deets[0]*np.pi/180,2)), 'VI (M)':vi}
+            andthis = pd.DataFrame([andthis])
+            andthis = poly.transform(andthis)
+            output = model.predict(andthis)
+            
+                   
+            defl = 3200 + int(d_AOF) - deets[0] 
+            
+            flat = macs[macs['VI (M)'] == 0]
+            
+            mo = output[0,3]
+            qe = output[0,1]
+            tof = output[0,2]
+            X = flat[['QE (mils)','LAT (deg)']]
+            y = flat[['Range (M)']]
+            X_train_poly = poly.fit_transform(X)
+            model.fit(X_train_poly, y)
+            andthis = {'QE (mils)':qe, 'LAT (deg)':round(lp[1],5)}
+            andthis = pd.DataFrame([andthis])
+            andthis = poly.transform(andthis)
+            output = model.predict(andthis)
+            
+            cr = output[0,0]
+            
+            
+            data = pd.DataFrame({'Range (Meters)':str(int(rng)),'Corrected Range (Meters)':str(int(cr)),
+                                 'Shell':'M795','Charge':chrg, 'Azimuth to Target (mils)':str(round(deets[0],1)),
+                                 'Grid Declination (mils)':str(round(gdm,1)),'Drift (mils)':str(round(output[0,0],1)),'Deflection (mils)':str(round(defl,1)),
+                                 'Muzzle Velocity (m/s)':str(macs.iat[1,7]),
+                                 'QE (mils)':str(round(qe,1)),
+                                 'Time of Flight (sec)':str(round(tof,1)),
+                                 'MaxOrd (Meters)':str(round(mo,0))},index = ['Fire Mission']).T 
             st.dataframe(data,height=500) 
 
         with c2:
             
-            tPoints = pd.DataFrame({'Ranges':[0,.57*CR,.58*CR,rng],'Alts':[int(d_lpalt),MO,MO,int(d_ipalt)]})
+            tPoints = pd.DataFrame({'Ranges':[0,.57*cr,.58*cr,rng],'Alts':[int(d_lpalt),mo,mo,int(d_ipalt)]})
             x, y = tPoints['Ranges'], tPoints['Alts']
             model5 = np.poly1d(np.polyfit(x, y, 5))
             x_traj = np.arange(0, int(rng), 100)
             y_traj = model5(x_traj)
             fig = px.scatter(tPoints, x=x_traj, y=y_traj)
-            fig.update_layout(autosize=False,width=800,height=MO/rng*800*1.5)
+            fig.update_layout(autosize=False,width=700,height=mo/rng*800*2.5)
             st.plotly_chart(fig)
             
             
