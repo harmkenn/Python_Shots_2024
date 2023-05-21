@@ -192,6 +192,8 @@ def app():
             mo = output[0,3]
             qe = output[0,1]
             tof = output[0,2]
+            drift = output[0,0]
+            
             X = flat[['QE (mils)','LAT (deg)']]
             y = flat[['Range (M)']]
             X_train_poly = poly.fit_transform(X)
@@ -206,7 +208,7 @@ def app():
             
             data = pd.DataFrame({'Range (Meters)':str(int(rng)),'Corrected Range (Meters)':str(int(cr)),
                                  'Shell':'M795','Charge':chrg, 'Azimuth to Target (mils)':str(round(deets[0],1)),
-                                 'Grid Declination (mils)':str(round(gdm,1)),'Drift (mils)':str(round(output[0,0],1)),'Deflection (mils)':str(round(defl,1)),
+                                 'Grid Declination (mils)':str(round(gdm,1)),'Drift (mils)':str(round(drift,1)),'Deflection (mils)':str(round(defl,1)),
                                  'Muzzle Velocity (m/s)':str(macs.iat[1,7]),
                                  'QE (mils)':str(round(qe,1)),
                                  'Time of Flight (sec)':str(round(tof,1)),
