@@ -159,41 +159,41 @@ def app():
             if gdm > 1600:
                 gdm = gdm - 3200
             macs = pd.read_csv('data/M795Macs.csv',encoding = 'latin1')
-            
-            macs = macs[macs['Charge'].str.contains(chrg[-2:])]
+            st.write(macs)
+            macs = macs[macs['Chg'].str.contains(chrg[-2:])]
             #st.write(macs)
             DriftM = ElasticNet()
-            DriftM.fit(macs[['Range']],macs['Drift'])
+            DriftM.fit(macs[['Range (M)']],macs['Drift'])
             drift = DriftM.predict([[rng]])[0]
             az = deets[0]*3200/180
             defl = 3200 - az + float(d_AOF) + drift + gdm
             mv = macs.iloc[1,1]
-            ElevM = ElasticNet()
-            ElevM.fit(macs[['Range']],macs['Elev'])
-            elev = ElevM.predict([[rng]])[0]
+            #ElevM = ElasticNet()
+            #ElevM.fit(macs[['Range (M)']],macs['Elev'])
+            #elev = ElevM.predict([[rng]])[0]
             vi = int(d_ipalt)-int(d_lpalt)
-            AOSm = np.arctan(vi/rng)*3200/np.pi
-            CSF = 0
-            if vi > 0:
-                CSFM = ElasticNet()
-                CSFM.fit(macs[['Range']],macs['csf.p'])
-                CSF = CSFM.predict([[rng]])[0]
-                CAS = AOSm*CSF
-            if vi < 0:
-                CSFM = ElasticNet()
-                CSFM.fit(macs[['Range']],macs['csf.n'])
-                CSF = CSFM.predict([[rng]])[0]
-                CAS = AOSm*CSF*(-1)
-            sitem = AOSm+CAS
+            #AOSm = np.arctan(vi/rng)*3200/np.pi
+            #CSF = 0
+            #if vi > 0:
+                #CSFM = ElasticNet()
+                #CSFM.fit(macs[['Range (M)']],macs['csf.p'])
+                #CSF = CSFM.predict([[rng]])[0]
+                #CAS = AOSm*CSF
+            #if vi < 0:
+                #CSFM = ElasticNet()
+                #CSFM.fit(macs[['Range (M)']],macs['csf.n'])
+                #CSF = CSFM.predict([[rng]])[0]
+                #CAS = AOSm*CSF*(-1)
+            #sitem = AOSm+CAS
             QE = elev+sitem
             tofM = ElasticNet()
-            tofM.fit(macs[['Range']],macs['TOF'])
+            tofM.fit(macs[['Range (M)']],macs['TOF'])
             TOF = tofM.predict([[rng]])[0]
             moM = ElasticNet()
             moM.fit(macs[['Elev']],macs['Maxord.z'])
             MO = moM.predict([[QE]])[0]
             crM = ElasticNet()
-            crM.fit(macs[['Elev']],macs['Range'])
+            crM.fit(macs[['Elev']],macs['Range (M)'])
             CR = crM.predict([[QE]])[0]
             data = pd.DataFrame({'Range (Meters)':str(int(rng)),'Corrected Range (Meters)':str(int(CR)),'Shell':'M795','Charge':chrg,
                                  'Azimuth to Target (mils)':str(round(az,1)),
