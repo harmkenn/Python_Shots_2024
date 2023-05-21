@@ -33,7 +33,8 @@ def app():
         st.session_state['d_lpmgrs'] = d_lpmgrs
         
         lp = zf.MGRS2LL(d_lpmgrs)
-        st.write('Launch Point (LL): '+str(round(lp[1],5))+', '+str(round(lp[2],5)))
+        st.write('Launch Point (LL):') 
+        st.write(str(round(lp[1],5))+', '+str(round(lp[2],5)))
 
         if 'd_lpalt' not in st.session_state: st.session_state['d_lpalt'] = 321
         d_lpalt = st.session_state['d_lpalt']
@@ -46,7 +47,8 @@ def app():
         st.session_state['d_ipmgrs'] = d_ipmgrs
 
         ip = zf.MGRS2LL(d_ipmgrs)
-        st.write('Impact Point (LL): '+str(round(ip[1],5))+', '+str(round(ip[2],5)))
+        st.write('Impact Point (LL):')
+        st.write(str(round(ip[1],5))+', '+str(round(ip[2],5)))
 
         if 'd_ipalt' not in st.session_state: st.session_state['d_ipalt'] = 621
         d_ipalt = st.session_state['d_ipalt']
@@ -156,7 +158,7 @@ def app():
                 gdm = gdm - 6400
             if gdm > 1600:
                 gdm = gdm - 3200
-            macs = pd.read_csv('data/MACs.csv',encoding = 'latin1')
+            macs = pd.read_csv('data/M795Macs.csv',encoding = 'latin1')
             
             macs = macs[macs['Charge'].str.contains(chrg[-2:])]
             #st.write(macs)
