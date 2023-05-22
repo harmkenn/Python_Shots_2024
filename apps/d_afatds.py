@@ -194,11 +194,12 @@ def app():
             tof = output[0,2]
             drift = output[0,0]
             
-            X = flat[['QE (mils)','LAT (deg)']]
+            X = flat[['QE (mils)','LAT (deg)','cosAZ','TOF','MAX Ord (M)']]
             y = flat[['Range (M)']]
             X_train_poly = poly.fit_transform(X)
             model.fit(X_train_poly, y)
-            andthis = {'QE (mils)':qe, 'LAT (deg)':round(lp[1],5)}
+            andthis = {'QE (mils)':qe, 'LAT (deg)':round(lp[1],5),'cosAZ':np.cos(round(deets[0]*np.pi/180,2)), 
+                       'TOF': tof, 'MAX Ord (M)': mo}
             andthis = pd.DataFrame([andthis])
             andthis = poly.transform(andthis)
             output = model.predict(andthis)
@@ -225,6 +226,7 @@ def app():
             fig = px.scatter(tPoints, x=x_traj, y=y_traj)
             fig.update_layout(autosize=False,width=700,height=mo/rng*800*2.5)
             st.plotly_chart(fig)
+            st.write(flat)
             
             
             
