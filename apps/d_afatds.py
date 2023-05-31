@@ -185,7 +185,7 @@ def app():
             output = model.predict(andthis)
             
                    
-            defl = 3200 + int(d_AOF) - deets[0] 
+            defl = 3200 + int(d_AOF) - deets[0] *3200/180
             
             flat = macs[macs['VI (M)'] == 0]
             
@@ -208,14 +208,14 @@ def app():
             
             
             data = pd.DataFrame({'Range (Meters)':str(int(rng)),'Corrected Range (Meters)':str(int(cr)),
-                                 'Shell':'M795','Charge':chrg, 'Azimuth to Target (mils)':str(round(deets[0],1)),
+                                 'Shell':'M795','Charge':chrg, 'Azimuth to Target (mils)':str(round(deets[0]*3200/180,1)),
                                  'Grid Declination (mils)':str(round(gdm,1)),'Drift (mils)':str(round(drift,1)),'Deflection (mils)':str(round(defl,1)),
                                  'Muzzle Velocity (m/s)':str(macs.iat[1,7]),
                                  'QE (mils)':str(round(qe,1)),
                                  'Time of Flight (sec)':str(round(tof,1)),
                                  'MaxOrd (Meters)':str(round(mo,0))},index = ['Fire Mission']).T 
             st.dataframe(data,height=500) 
-
+            st.write(deets)
         with c2:
             
             tPoints = pd.DataFrame({'Ranges':[0,.57*cr,.58*cr,rng],'Alts':[int(d_lpalt),mo,mo,int(d_ipalt)]})
