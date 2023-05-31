@@ -125,6 +125,7 @@ def app():
             st.write('Bearing: '+str(round(deets[0],2)) + ' degrees')
             st.write('Azimuth: '+str(round(deets[0]*3200/180,2)) + ' mils')
             diff =  round(aof-deets[0]*3200/180+3200,0)
+            if diff<0: diff = diff + 6400
             st.write('Deflection: '+str(diff)+' mils')
             
     
