@@ -179,7 +179,7 @@ def app():
             # create a linear regression model and fit the training data
             model = LinearRegression()
             model.fit(X_train_poly, y)
-            
+            st.write(deets)
             andthis = {'Range (M)':rng, 'cosAZ':np.cos(round(deets[0]*np.pi/180,2)), 'Galt (M)':d_lpalt,  'Talt (M)':d_ipalt }
             st.write(macs)
             andthis = pd.DataFrame([andthis])
