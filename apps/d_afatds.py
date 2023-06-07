@@ -26,7 +26,7 @@ def app():
             alt = zf.elevation(where[1],where[2])
             st.sidebar.write('Alt :'+str(round(alt,2))+' Meters')
     with c1:
-        if 'd_lpmgrs' not in st.session_state: st.session_state['d_lpmgrs'] = '12RWU1059022575'
+        if 'd_lpmgrs' not in st.session_state: st.session_state['d_lpmgrs'] = '29NQH5872754513'
         d_lpmgrs = st.session_state['d_lpmgrs']
         d_lpmgrs = st.text_input('Launch Point (MGRS):',d_lpmgrs, key = 'd1')
         st.session_state['d_lpmgrs'] = d_lpmgrs
@@ -35,12 +35,12 @@ def app():
         st.write('Launch Point (LL):') 
         st.write(str(round(lp[1],5))+', '+str(round(lp[2],5)))
 
-        if 'd_lpalt' not in st.session_state: st.session_state['d_lpalt'] = 321
+        if 'd_lpalt' not in st.session_state: st.session_state['d_lpalt'] = 123
         d_lpalt = st.session_state['d_lpalt']
         d_lpalt = st.text_input('Launch Altitude (M):',d_lpalt, key = 'd3')
         st.session_state['d_lpalt'] = d_lpalt
 
-        if 'd_ipmgrs' not in st.session_state: st.session_state['d_ipmgrs'] = '12RWU2645019206'
+        if 'd_ipmgrs' not in st.session_state: st.session_state['d_ipmgrs'] = '29NQH4843150392'
         d_ipmgrs = st.session_state['d_ipmgrs']
         d_ipmgrs = st.text_input('Imoact Point (MGRS):',d_ipmgrs, key = 'd2')
         st.session_state['d_ipmgrs'] = d_ipmgrs
@@ -49,12 +49,12 @@ def app():
         st.write('Impact Point (LL):')
         st.write(str(round(ip[1],5))+', '+str(round(ip[2],5)))
 
-        if 'd_ipalt' not in st.session_state: st.session_state['d_ipalt'] = 621
+        if 'd_ipalt' not in st.session_state: st.session_state['d_ipalt'] = 321
         d_ipalt = st.session_state['d_ipalt']
         d_ipalt = st.text_input('Impact Altitude (M):',d_ipalt, key = 'd4')
         st.session_state['d_ipalt'] = d_ipalt
 
-        if 'd_AOF' not in st.session_state: st.session_state['d_AOF'] = 1200
+        if 'd_AOF' not in st.session_state: st.session_state['d_AOF'] = 0
         d_AOF = st.session_state['d_AOF']
         d_AOF = st.text_input('Azimuth of Fire (mils):',d_AOF, key = 'd5')
         st.session_state['d_AOF'] = d_AOF 
@@ -140,7 +140,7 @@ def app():
             rng = round(deets[2],0)
             chrg = st.selectbox('Charge:',['Auto','1L','2L','3H','4H','5H'])
             if chrg == 'Auto':
-                chrg = pd.cut([rng], bins=[-1,2000,5000,8000,11000,14000,25000,99999999], labels=['Too Short','1L','2L','3H','4H','5H','Too Far'])
+                chrg = pd.cut([rng], bins=[-1,2000,5000,8000,12000,15000,25000,99999999], labels=['Too Short','1L','2L','3H','4H','5H','Too Far'])
                 chrg = chrg[0]
 
             ning = int(d_lpmgrs[-5:])
@@ -183,16 +183,15 @@ def app():
             andthis = pd.DataFrame([andthis])
             andthis = poly.transform(andthis)
             output = model.predict(andthis)
-            
-                   
-            defl = 3200 + int(d_AOF) - deets[0] 
-            
+                     
             flat = macs[macs['VI (M)'] == 0]
             
             mo = output[0,3]
             qe = output[0,1]
             tof = output[0,2]
             drift = output[0,0]
+            defl = 3200 + int(d_AOF) - deets[0] *3200/180 + drift + gdm
+            if defl<0: defl = defl + 6400
             
             X = flat[['QE (mils)','LAT (deg)','cosAZ','TOF','MAX Ord (M)']]
             y = flat[['Range (M)']]
@@ -207,18 +206,19 @@ def app():
             cr = output[0,0]
             
             
-            data = pd.DataFrame({'Range (Meters)':str(int(rng)),'Corrected Range (Meters)':str(int(cr)),
-                                 'Shell':'M795','Charge':chrg, 'Azimuth to Target (mils)':str(round(deets[0],1)),
+            data = pd.DataFrame({'Range (Meters)':str(int(rng)),
+                                 'Shell':'M795','Charge':chrg, 'Azimuth to Target (mils)':str(round(deets[0]*3200/180-drift+gdm,0)),
                                  'Grid Declination (mils)':str(round(gdm,1)),'Drift (mils)':str(round(drift,1)),'Deflection (mils)':str(round(defl,1)),
                                  'Muzzle Velocity (m/s)':str(macs.iat[1,7]),
                                  'QE (mils)':str(round(qe,1)),
                                  'Time of Flight (sec)':str(round(tof,1)),
                                  'MaxOrd (Meters)':str(round(mo,0))},index = ['Fire Mission']).T 
             st.dataframe(data,height=500) 
-
+           
         with c2:
             
-            tPoints = pd.DataFrame({'Ranges':[0,.57*cr,.58*cr,rng],'Alts':[int(d_lpalt),mo,mo,int(d_ipalt)]})
+            tPoints = pd.DataFrame({'Ranges':[0,.1*rng,.60*rng,.61*rng,rng],'Alts':[int(d_lpalt),.15*rng*np.tan(qe/3200*np.pi),mo,mo,int(d_ipalt)]})
+           
             x, y = tPoints['Ranges'], tPoints['Alts']
             model5 = np.poly1d(np.polyfit(x, y, 5))
             x_traj = np.arange(0, int(rng), 100)
@@ -226,7 +226,8 @@ def app():
             fig = px.scatter(tPoints, x=x_traj, y=y_traj)
             fig.update_layout(autosize=False,width=700,height=mo/rng*800*2.5)
             st.plotly_chart(fig)
-            st.write(flat)
+
+ 
             
             
             
