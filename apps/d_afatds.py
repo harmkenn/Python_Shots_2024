@@ -168,7 +168,7 @@ def app():
             macs = macs.loc[macs['Chg'] == chrg]
 
             # Extract the feature and target variables
-            X = macs[['Range (M)', 'LAT (deg)', 'cosAZ', 'VI (M)']]
+            X = macs[['Range (M)', 'cosAZ', 'Galt (M)','Talt (M)']]
             y = macs[['Drift', 'QE (mils)', 'TOF', 'MAX Ord (M)']]
             
             # transform the input data to include polynomial terms up to degree 3
