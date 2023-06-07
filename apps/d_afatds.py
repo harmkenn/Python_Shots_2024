@@ -184,7 +184,7 @@ def app():
             andthis = poly.transform(andthis)
             output = model.predict(andthis)
                      
-            flat = macs[macs['VI (M)'] == 0]
+            #flat = macs[macs['VI (M)'] == 0]
             
             mo = output[0,3]
             qe = output[0,1]
