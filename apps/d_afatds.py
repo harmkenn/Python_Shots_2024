@@ -160,8 +160,9 @@ def app():
                 gdm = gdm - 3200
 
             macs = pd.read_csv('data/M795Macs.csv')
+
+            #macs = macs[macs['Chg'].str.contains(chrg[-2:])]
             
-            macs = macs[macs['Chg'].str.contains(chrg[-2:])]
             # Load data from CSV file
             
             macs['cosAZ'] = np.cos(macs['GTL (mils)']*np.pi/3200)
@@ -178,12 +179,13 @@ def app():
             # create a linear regression model and fit the training data
             model = LinearRegression()
             model.fit(X_train_poly, y)
-            vi = int(d_ipalt)-int(d_lpalt)
-            andthis = {'Range (M)':rng, 'LAT (deg)':round(lp[1],5), 'cosAZ':np.cos(round(deets[0]*np.pi/180,2)), 'VI (M)':vi}
+            
+            andthis = {'Range (M)':rng, 'cosAZ':np.cos(round(deets[0]*np.pi/180,2)), 'Galt (M)':d_lpalt,  'Talt (M)':d_ipalt }
+            st.write(macs)
             andthis = pd.DataFrame([andthis])
             andthis = poly.transform(andthis)
             output = model.predict(andthis)
-                     
+            st.write(output)         
             #flat = macs[macs['VI (M)'] == 0]
             
             mo = output[0,3]
@@ -192,20 +194,7 @@ def app():
             drift = output[0,0]
             defl = 3200 + int(d_AOF) - deets[0] *3200/180 + drift + gdm
             if defl<0: defl = defl + 6400
-            
-            X = flat[['QE (mils)','LAT (deg)','cosAZ','TOF','MAX Ord (M)']]
-            y = flat[['Range (M)']]
-            X_train_poly = poly.fit_transform(X)
-            model.fit(X_train_poly, y)
-            andthis = {'QE (mils)':qe, 'LAT (deg)':round(lp[1],5),'cosAZ':np.cos(round(deets[0]*np.pi/180,2)), 
-                       'TOF': tof, 'MAX Ord (M)': mo}
-            andthis = pd.DataFrame([andthis])
-            andthis = poly.transform(andthis)
-            output = model.predict(andthis)
-            
-            cr = output[0,0]
-            
-            
+                        
             data = pd.DataFrame({'Range (Meters)':str(int(rng)),
                                  'Shell':'M795','Charge':chrg, 'Azimuth to Target (mils)':str(round(deets[0]*3200/180-drift+gdm,0)),
                                  'Grid Declination (mils)':str(round(gdm,1)),'Drift (mils)':str(round(drift,1)),'Deflection (mils)':str(round(defl,1)),
