@@ -4,12 +4,12 @@ import folium
 from streamlit_folium import folium_static
 from folium import plugins
 import numpy as np
-from sklearn.linear_model import ElasticNet
 from scipy.optimize import curve_fit
 import plotly.express as px
 from apps import z_functions as zf
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
+from sklearn.pipeline import make_pipeline
 
 def app():
     # title of the app
@@ -172,21 +172,19 @@ def app():
             X = macs[['Range (M)', 'cosAZ', 'Galt (M)','Talt (M)']]
             y = macs[['Drift', 'QE (mils)', 'TOF', 'MAX Ord (M)']]
             
-            # transform the input data to include polynomial terms up to degree 3
-            poly = PolynomialFeatures(degree=3, include_bias=False)
-            X_train_poly = poly.fit_transform(X)
-            
-            # create a linear regression model and fit the training data
+            # Creating polynomial features
+            degree = 3  # Set the degree of the polynomial
+            poly_features = PolynomialFeatures(degree=degree)
+            input_features_poly = poly_features.fit_transform(X)
+
+            # Creating and training the polynomial regression model
             model = LinearRegression()
-            model.fit(X_train_poly, y)
-            st.write(deets)
-            andthis = {'Range (M)':rng, 'cosAZ':np.cos(round(deets[0]*np.pi/180,2)), 'Galt (M)':d_lpalt,  'Talt (M)':d_ipalt }
-            st.write(macs)
-            andthis = pd.DataFrame([andthis])
-            andthis = poly.transform(andthis)
-            output = model.predict(andthis)
-            st.write(output)         
-            #flat = macs[macs['VI (M)'] == 0]
+            model.fit(input_features_poly, y)
+            
+            new_data = pd.DataFrame({'Range (M)':[rng], 'cosAZ':[deets[0]*np.pi/180], 'Galt (M)':[d_lpalt],'Talt (M)':[d_ipalt]})
+            new_input_features_poly = poly_features.transform(new_data)
+            output = model.predict(new_input_features_poly)
+
             
             mo = output[0,3]
             qe = output[0,1]
@@ -196,7 +194,7 @@ def app():
             if defl<0: defl = defl + 6400
                         
             data = pd.DataFrame({'Range (Meters)':str(int(rng)),
-                                 'Shell':'M795','Charge':chrg, 'Azimuth to Target (mils)':str(round(deets[0]*3200/180-drift+gdm,0)),
+                                 'Shell':'M795','Charge':chrg, 'Azimuth to Target (mils)':str(round(deets[0]*3200/180,0)),
                                  'Grid Declination (mils)':str(round(gdm,1)),'Drift (mils)':str(round(drift,1)),'Deflection (mils)':str(round(defl,1)),
                                  'Muzzle Velocity (m/s)':str(macs.iat[1,7]),
                                  'QE (mils)':str(round(qe,1)),
