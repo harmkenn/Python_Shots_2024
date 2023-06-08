@@ -173,8 +173,8 @@ def app():
             y = macs[['Drift', 'QE (mils)', 'TOF', 'MAX Ord (M)']]
             
             # Creating polynomial features
-            degree = 3  # Set the degree of the polynomial
-            poly_features = PolynomialFeatures(degree=degree)
+            
+            poly_features = PolynomialFeatures(degree=3)
             input_features_poly = poly_features.fit_transform(X)
 
             # Creating and training the polynomial regression model
@@ -184,7 +184,8 @@ def app():
             new_data = pd.DataFrame({'Range (M)':[rng], 'cosAZ':[deets[0]*np.pi/180], 'Galt (M)':[d_lpalt],'Talt (M)':[d_ipalt]})
             new_input_features_poly = poly_features.transform(new_data)
             output = model.predict(new_input_features_poly)
-
+            st.write(new_data)
+            st.write(output)
             
             mo = output[0,3]
             qe = output[0,1]
