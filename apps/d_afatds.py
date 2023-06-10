@@ -229,7 +229,7 @@ def app():
                                      'Galt (M)':[d_lpalt], 
                                      'AOS (mils)':[np.arctan((int(d_ipalt)-int(d_lpalt))/rng)*3200/np.pi],
                                      'QE (mils)':[qe], 'TOF':[tof]})
-            st.write(new_data)
+            
             new_input_features_poly = poly_features.transform(new_data)
             output = model.predict(new_input_features_poly)
             mo = output[0,0]
