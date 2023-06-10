@@ -165,7 +165,6 @@ def app():
             
             # Load data from CSV file
             
-            macs['cosAZ'] = np.cos(macs['GTL (mils)']*np.pi/3200)
             macs = macs.loc[macs['Chg'] == chrg]
 
             # Extract the feature and target variables
@@ -189,7 +188,7 @@ def app():
             if defl<0: defl = defl + 6400
             
             # Extract the feature and target variables
-            X = macs[['Range (M)', 'cosAZ', 'Galt (M)','Talt (M)']]
+            X = macs[['Range (M)', 'sinAZ', 'Galt (M)','AOS (mils)']]
             y = macs[['QE (mils)', 'TOF']] # , 'MAX Ord (M)'
             
             # Creating polynomial features
@@ -201,7 +200,11 @@ def app():
             model = LinearRegression()
             model.fit(input_features_poly, y)
             
-            new_data = pd.DataFrame({'Range (M)':[rng], 'cosAZ':[deets[0]*np.pi/180], 'Galt (M)':[d_lpalt],'Talt (M)':[d_ipalt]}) #
+            new_data = pd.DataFrame({'Range (M)':[rng], 
+                                     'sinAZ':[np.sin(deets[0]*np.pi/180)], 
+                                     'Galt (M)':[d_lpalt], 
+                                     'AOS (mils)':[np.arctan((int(d_ipalt)-int(d_lpalt))/rng)*3200/np.pi]})
+            st.write(new_data)
             new_input_features_poly = poly_features.transform(new_data)
             output = model.predict(new_input_features_poly)
  
@@ -222,7 +225,7 @@ def app():
                                  #'MaxOrd (Meters)':str(round(mo,0))
                                  
             st.dataframe(data,height=500) 
-           
+        '''   
         with c2:
             st.write(macs)
             tPoints = pd.DataFrame({'Ranges':[0,.1*rng,.60*rng,.61*rng,rng],'Alts':[int(d_lpalt),.15*rng*np.tan(qe/3200*np.pi),mo,mo,int(d_ipalt)]})
@@ -234,7 +237,7 @@ def app():
             fig = px.scatter(tPoints, x=x_traj, y=y_traj)
             fig.update_layout(autosize=False,width=700,height=mo/rng*800*2.5)
             st.plotly_chart(fig)
-
+        '''
  
             
             
