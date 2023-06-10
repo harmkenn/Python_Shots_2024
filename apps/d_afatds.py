@@ -169,8 +169,8 @@ def app():
             macs = macs.loc[macs['Chg'] == chrg]
 
             # Extract the feature and target variables
-            X = macs[['Range (M)', 'cosAZ', 'Galt (M)','Talt (M)']]
-            y = macs[['Drift', 'QE (mils)', 'TOF', 'MAX Ord (M)']]
+            X = macs[['Range (M)']] # , 'cosAZ', 'Galt (M)','Talt (M)'
+            y = macs[['Drift']] # , 'QE (mils)', 'TOF', 'MAX Ord (M)'
             
             # Creating polynomial features
             
@@ -181,30 +181,50 @@ def app():
             model = LinearRegression()
             model.fit(input_features_poly, y)
             
-            new_data = pd.DataFrame({'Range (M)':[rng], 'cosAZ':[deets[0]*np.pi/180], 'Galt (M)':[d_lpalt],'Talt (M)':[d_ipalt]})
+            new_data = pd.DataFrame({'Range (M)':[rng]}) #, 'cosAZ':[deets[0]*np.pi/180], 'Galt (M)':[d_lpalt],'Talt (M)':[d_ipalt]
             new_input_features_poly = poly_features.transform(new_data)
             output = model.predict(new_input_features_poly)
-            st.write(new_data)
-            st.write(output)
-            
-            mo = output[0,3]
-            qe = output[0,1]
-            tof = output[0,2]
             drift = output[0,0]
             defl = 3200 + int(d_AOF) - deets[0] *3200/180 + drift + gdm
             if defl<0: defl = defl + 6400
+            
+            # Extract the feature and target variables
+            X = macs[['Range (M)', 'cosAZ', 'Galt (M)','Talt (M)']]
+            y = macs[['QE (mils)', 'TOF']] # , 'MAX Ord (M)'
+            
+            # Creating polynomial features
+            
+            poly_features = PolynomialFeatures(degree=3)
+            input_features_poly = poly_features.fit_transform(X)
+
+            # Creating and training the polynomial regression model
+            model = LinearRegression()
+            model.fit(input_features_poly, y)
+            
+            new_data = pd.DataFrame({'Range (M)':[rng], 'cosAZ':[deets[0]*np.pi/180], 'Galt (M)':[d_lpalt],'Talt (M)':[d_ipalt]}) #
+            new_input_features_poly = poly_features.transform(new_data)
+            output = model.predict(new_input_features_poly)
+ 
+            qe = output[0,0]
+            tof = output[0,1]
+            #mo = output[0,2]
+            
+            
                         
             data = pd.DataFrame({'Range (Meters)':str(int(rng)),
-                                 'Shell':'M795','Charge':chrg, 'Azimuth to Target (mils)':str(round(deets[0]*3200/180,0)),
-                                 'Grid Declination (mils)':str(round(gdm,1)),'Drift (mils)':str(round(drift,1)),'Deflection (mils)':str(round(defl,1)),
-                                 'Muzzle Velocity (m/s)':str(macs.iat[1,7]),
-                                 'QE (mils)':str(round(qe,1)),
-                                 'Time of Flight (sec)':str(round(tof,1)),
-                                 'MaxOrd (Meters)':str(round(mo,0))},index = ['Fire Mission']).T 
+                                 'Shell':'M795','Charge':chrg, 'Muzzle Velocity (m/s)':str(round(macs['MV (m/s)'].mean(),1)),'Azimuth to Target (mils)':str(round(deets[0]*3200/180,0)),
+                                 'Grid Declination (mils)':str(round(gdm,1)),'Drift (mils)':str(round(drift,1)),
+                                 'Deflection (mils)':str(round(defl,1)), 'QE (mils)':str(round(qe,1)),
+                                 'Time of Flight (sec)':str(round(tof,1))},
+                                index = ['Fire Mission']).T 
+                                
+                                
+                                 #'MaxOrd (Meters)':str(round(mo,0))
+                                 
             st.dataframe(data,height=500) 
            
         with c2:
-            
+            st.write(macs)
             tPoints = pd.DataFrame({'Ranges':[0,.1*rng,.60*rng,.61*rng,rng],'Alts':[int(d_lpalt),.15*rng*np.tan(qe/3200*np.pi),mo,mo,int(d_ipalt)]})
            
             x, y = tPoints['Ranges'], tPoints['Alts']
