@@ -204,13 +204,35 @@ def app():
                                      'sinAZ':[np.sin(deets[0]*np.pi/180)], 
                                      'Galt (M)':[d_lpalt], 
                                      'AOS (mils)':[np.arctan((int(d_ipalt)-int(d_lpalt))/rng)*3200/np.pi]})
-            st.write(new_data)
+
             new_input_features_poly = poly_features.transform(new_data)
             output = model.predict(new_input_features_poly)
  
             qe = output[0,0]
             tof = output[0,1]
-            #mo = output[0,2]
+            
+            # Extract the feature and target variables
+            X = macs[['Range (M)', 'sinAZ', 'Galt (M)','AOS (mils)','QE (mils)', 'TOF']]
+            y = macs[['MAX Ord (M)']] 
+            
+            # Creating polynomial features
+            
+            poly_features = PolynomialFeatures(degree=3)
+            input_features_poly = poly_features.fit_transform(X)
+
+            # Creating and training the polynomial regression model
+            model = LinearRegression()
+            model.fit(input_features_poly, y)
+            
+            new_data = pd.DataFrame({'Range (M)':[rng], 
+                                     'sinAZ':[np.sin(deets[0]*np.pi/180)], 
+                                     'Galt (M)':[d_lpalt], 
+                                     'AOS (mils)':[np.arctan((int(d_ipalt)-int(d_lpalt))/rng)*3200/np.pi],
+                                     'QE (mils)':[qe], 'TOF':[tof]})
+            st.write(new_data)
+            new_input_features_poly = poly_features.transform(new_data)
+            output = model.predict(new_input_features_poly)
+            mo = output[0,0]
             
             
                         
@@ -218,17 +240,17 @@ def app():
                                  'Shell':'M795','Charge':chrg, 'Muzzle Velocity (m/s)':str(round(macs['MV (m/s)'].mean(),1)),'Azimuth to Target (mils)':str(round(deets[0]*3200/180,0)),
                                  'Grid Declination (mils)':str(round(gdm,1)),'Drift (mils)':str(round(drift,1)),
                                  'Deflection (mils)':str(round(defl,1)), 'QE (mils)':str(round(qe,1)),
-                                 'Time of Flight (sec)':str(round(tof,1))},
+                                 'Time of Flight (sec)':str(round(tof,1)), 'Max Ord':str(int(mo))},
                                 index = ['Fire Mission']).T 
                                 
                                 
                                  #'MaxOrd (Meters)':str(round(mo,0))
                                  
             st.dataframe(data,height=500) 
-        '''   
+           
         with c2:
-            st.write(macs)
-            tPoints = pd.DataFrame({'Ranges':[0,.1*rng,.60*rng,.61*rng,rng],'Alts':[int(d_lpalt),.15*rng*np.tan(qe/3200*np.pi),mo,mo,int(d_ipalt)]})
+            
+            tPoints = pd.DataFrame({'Ranges':[0,.1*rng,.60*rng,.61*rng,rng],'Alts':[int(d_lpalt),.12*rng*np.tan(qe/3200*np.pi),mo,mo,int(d_ipalt)]})
            
             x, y = tPoints['Ranges'], tPoints['Alts']
             model5 = np.poly1d(np.polyfit(x, y, 5))
@@ -237,7 +259,7 @@ def app():
             fig = px.scatter(tPoints, x=x_traj, y=y_traj)
             fig.update_layout(autosize=False,width=700,height=mo/rng*800*2.5)
             st.plotly_chart(fig)
-        '''
+        
  
             
             
