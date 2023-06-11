@@ -249,16 +249,62 @@ def app():
             st.dataframe(data,height=500) 
            
         with c2:
+            # Define the cubic polynomial function
+            def cubic_function(x, a, b, c, d):
+                return a * x**3 + b * x**2 + c * x + d
+
+            # Define the x and y coordinates of the four points
+            x_data = np.array([0, 200, .6*rng, rng])
+            y_data = np.array([int(d_lpalt), np.tan(qe*np.pi/3200)*200+int(d_lpalt), mo, int(d_ipalt)])
+
+            # Use curve_fit to fit the cubic function to the data
+            popt, pcov = curve_fit(cubic_function, x_data, y_data)
+
+            # Retrieve the fitted coefficients
+            a_fit, b_fit, c_fit, d_fit = popt
             
-            tPoints = pd.DataFrame({'Ranges':[0,.1*rng,.60*rng,.61*rng,rng],'Alts':[int(d_lpalt),.12*rng*np.tan(qe/3200*np.pi),mo,mo,int(d_ipalt)]})
-           
+            # This is for mv deceleration
+            
+            def find_ratio(ss, a1, n1):
+                ratio = 0.0
+
+                # Iterate over a range of values for ratio
+                for r in range(1, 1000):
+                    r /= 1000.0  # Convert to decimal value
+
+                    # Calculate the sum using the geometric series formula
+                    Sn = a1 * (1 - r**n1) / (1 - r)
+
+                    # Compare the calculated sum with the desired sum
+                    if abs(Sn - ss) < ss*.05:
+                        ratio = r
+                        break
+
+                return ratio
+
+            # Example usage
+            ss = rng
+            a1 = macs['MV (m/s)'].mean() * np.cos(qe*np.pi/3200)
+            n1 = int(tof)
+
+            ratio = find_ratio(ss, a1, n1) 
+            
+            tPoints = pd.DataFrame(index=range(n1+3))
+            tPoints['Ranges'] = a1 * (1 - ratio ** tPoints.index) / (1 - ratio)
+            def traj(x):
+                return a_fit * x ** 3 + b_fit * x ** 2 + c_fit * x + d_fit
+            tPoints['Alts'] = tPoints['Ranges'].apply(traj)
+            
+
+            
             x, y = tPoints['Ranges'], tPoints['Alts']
-            model5 = np.poly1d(np.polyfit(x, y, 5))
-            x_traj = np.arange(0, int(rng), 100)
-            y_traj = model5(x_traj)
-            fig = px.scatter(tPoints, x=x_traj, y=y_traj)
+            
+            fig = px.scatter(tPoints, x=x, y=y)
             fig.update_layout(autosize=False,width=700,height=mo/rng*800*2.5)
             st.plotly_chart(fig)
+            
+
+            st.write(tPoints)
         
  
             
