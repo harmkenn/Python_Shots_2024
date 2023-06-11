@@ -5,6 +5,7 @@ plotly
 sklearn
 folium
 streamlit_folium
+sklearn
 pygeodesy
 scipy
 plotly.express
