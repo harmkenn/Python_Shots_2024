@@ -213,8 +213,8 @@ def app():
             tof = output[0,1]
             
             # Extract the feature and target variables
-            X = macs[['Range (M)', 'sinAZ', 'Galt (M)','AOS (mils)','QE (mils)', 'TOF']]
-            y = macs[['MAX Ord (M)']] 
+            X = macs[['QE (mils)']]
+            y = macs[['Moz']] 
             
             # Creating polynomial features
             
@@ -225,15 +225,11 @@ def app():
             model = LinearRegression()
             model.fit(input_features_poly, y)
             
-            new_data = pd.DataFrame({'Range (M)':[rng], 
-                                     'sinAZ':[np.sin(deets[0]*np.pi/180)], 
-                                     'Galt (M)':[d_lpalt], 
-                                     'AOS (mils)':[np.arctan((int(d_ipalt)-int(d_lpalt))/rng)*3200/np.pi],
-                                     'QE (mils)':[qe], 'TOF':[tof]})
+            new_data = pd.DataFrame({'QE (mils)':[qe]})
             
             new_input_features_poly = poly_features.transform(new_data)
             output = model.predict(new_input_features_poly)
-            mo = output[0,0]
+            mo = output[0,0] + int(d_lpalt)
             
             
                         
