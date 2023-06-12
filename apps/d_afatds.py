@@ -1,3 +1,5 @@
+
+SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True
 import streamlit as st
 import pandas as pd
 import folium
