@@ -1,4 +1,5 @@
-streamlit
+
+SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=Truestreamlit
 numpy
 pandas
 plotly
