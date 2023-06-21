@@ -211,7 +211,7 @@ def app():
             new_input_features_poly = poly_features.transform(new_data)
             output = model.predict(new_input_features_poly)
  
-            qe = output[0,0] - int(d_lpalt)/10 
+            qe = output[0,0]
             tof = output[0,1]
             
             # Extract the feature and target variables
