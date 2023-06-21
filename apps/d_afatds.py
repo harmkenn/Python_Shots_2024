@@ -231,7 +231,7 @@ def app():
             
             new_input_features_poly = poly_features.transform(new_data)
             output = model.predict(new_input_features_poly)
-            mo = output[0,0] + int(d_lpalt)
+            mo = output[0,0] + int(d_lpalt) * .95
             
             
                         
