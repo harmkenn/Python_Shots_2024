@@ -236,7 +236,7 @@ def app():
             
                         
             data = pd.DataFrame({'Range (Meters)':str(int(rng)),
-                                 'Shell':'M795','Charge':chrg, 'Muzzle Velocity (m/s)':str(round(macs['MV (m/s)'].mean(),1)),'Azimuth to Target (mils)':str(round(deets[0]*3200/180 + gdm,0)),
+                                 'Shell':'M795','Charge':chrg, 'Muzzle Velocity (m/s)':str(round(macs['MV (m/s)'].mean(),1)),'Azimuth to Target (mils)':str(round(deets[0]*3200/180 - gdm,0)),
                                  'Grid Declination (mils)':str(round(gdm,1)),'Drift (mils)':str(round(drift,1)),
                                  'Deflection (mils)':str(round(defl,1)), 'QE (mils)':str(round(qe,1)),
                                  'Time of Flight (sec)':str(round(tof,1)), 'Max Ord':str(int(mo))},
