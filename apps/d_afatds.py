@@ -45,7 +45,7 @@ def app():
 
         if 'd_ipmgrs' not in st.session_state: st.session_state['d_ipmgrs'] = '29NQH4843150392'
         d_ipmgrs = st.session_state['d_ipmgrs']
-        d_ipmgrs = st.text_input('Imoact Point (MGRS):',d_ipmgrs, key = 'd2')
+        d_ipmgrs = st.text_input('Impact Point (MGRS):',d_ipmgrs, key = 'd2')
         st.session_state['d_ipmgrs'] = d_ipmgrs
 
         ip = zf.MGRS2LL(d_ipmgrs)
