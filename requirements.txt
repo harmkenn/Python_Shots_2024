@@ -10,5 +10,9 @@ plotly.express
 scikit-learn 
 pip
 pygeodesy
+ephem
+matplotlib
+pyephem
+astropy
 # pip3 install -U scikit-learn scipy matplotli
 # pip install -r requirements.txt
