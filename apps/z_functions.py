@@ -306,3 +306,16 @@ def subsolar(utc):
     lo = degrees(ra - st) % 360
     lo = lo - 360 if lo > 180 else lo
     return [round(la, 6), round(lo, 6)]
+
+
+import pyproj
+
+def revpolar(P2lon,P2lat,P1az,dist):
+    geodesic = pyproj.Geod(ellps='WGS84')
+    P2az = P1az + 180
+    endlon, endlat, backaz = geodesic.fwd(P2lon,P2lat,P2az,dist)
+    for i in range(1, 200):
+        P2az = P1az - backaz + P2az
+        endlon, endlat, backaz = geodesic.fwd(P2lon,P2lat,P2az,dist)
+    if backaz < 0: backaz = backaz + 360
+    return [endlon, endlat, backaz]

@@ -54,9 +54,12 @@ def app():
     st.write(f"{selection}'s Azimuth from 0,0:", cel_azimuth)
     st.write(f"{selection}'s Altitude from 0,0:", cel_altitude)
     cel_dist = 40050*(90-cel_altitude)/360
+    dist = 40050*(90-h_alt)/360
     st.write(cel_dist)
     sub_cel = zf.polar2LL(0,0,cel_azimuth,cel_dist)
     st.write(f"{selection}'s Sub-Latitude: ", sub_cel[0], f"{selection}'s Sub-Longitude: ", sub_cel[1] )
+
+    st.write(zf.revpolar(sub_cel[0],sub_cel[1],float(h_az),dist))
     
 
 
