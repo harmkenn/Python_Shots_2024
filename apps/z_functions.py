@@ -312,10 +312,14 @@ import pyproj
 
 def revpolar(P2lon,P2lat,P1az,dist):
     geodesic = pyproj.Geod(ellps='WGS84')
+    #st.write(P2lon,P2lat,P1az,dist)
     P2az = P1az + 180
     endlon, endlat, backaz = geodesic.fwd(P2lon,P2lat,P2az,dist)
+    #st.write(endlon, endlat, backaz)
     for i in range(1, 200):
         P2az = P1az - backaz + P2az
         endlon, endlat, backaz = geodesic.fwd(P2lon,P2lat,P2az,dist)
+        
     if backaz < 0: backaz = backaz + 360
+    #st.write(endlon, endlat, backaz)
     return [endlon, endlat, backaz]

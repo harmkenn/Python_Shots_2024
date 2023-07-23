@@ -20,8 +20,10 @@ def app():
     st.session_state['h_time'] = h_time
     st.write(str(h_time)+'UTC')
 
-    h_az = st.number_input(f'Azimuth degrees to {selection}: ', 0,360,45)
-    h_alt = st.number_input(f'Altitude degrees to {selection}: ', 0,90,45)
+    h_az = st.number_input(f'Azimuth degrees to {selection}: ', 0.00,360.00,45.00)
+    h_alt = st.number_input(f'Altitude degrees to {selection}: ',-90.00,90.00,45.00)
+
+    # https://theskylive.com/planetarium?obj=moon#ra|9.854204231576311|dec|32.20240956176751|fov|50
 
     observer = ephem.Observer()
     observer.lat = '0'  # Example latitude (London, United Kingdom)
@@ -51,15 +53,17 @@ def app():
     cel.compute(observer)
     cel_azimuth = float(cel.az)*180/np.pi
     cel_altitude = float(cel.alt)*180/np.pi
+    
+    cel_dist = 40050*(90-cel_altitude)/360
+    dist = 40050*(90-h_alt)/360*1000
+    st.write(f'sub-Celestial distace from observer: ', cel_dist)
     st.write(f"{selection}'s Azimuth from 0,0:", cel_azimuth)
     st.write(f"{selection}'s Altitude from 0,0:", cel_altitude)
-    cel_dist = 40050*(90-cel_altitude)/360
-    dist = 40050*(90-h_alt)/360
-    st.write(cel_dist)
     sub_cel = zf.polar2LL(0,0,cel_azimuth,cel_dist)
     st.write(f"{selection}'s Sub-Latitude: ", sub_cel[0], f"{selection}'s Sub-Longitude: ", sub_cel[1] )
 
-    st.write(zf.revpolar(sub_cel[0],sub_cel[1],float(h_az),dist))
+    obloc = zf.revpolar(sub_cel[1],sub_cel[0],float(h_az),dist)
+    st.write(f"Observer's Location is Latitude: ", obloc[1], f" Longitude: ", obloc[0] )
     
 
 
