@@ -25,9 +25,9 @@ def app():
 
     # https://theskylive.com/planetarium?obj=moon#ra|9.854204231576311|dec|32.20240956176751|fov|50
 
-    observer = ephem.Observer()
-    observer.lat = '0'  # Example latitude (London, United Kingdom)
-    observer.lon = '0'
+    origin = ephem.Observer()
+    origin.lat = '0'  # Example latitude (London, United Kingdom)
+    origin.lon = '0'
     if selection == 'the Sun': 
         cel = ephem.Sun()
     elif selection == 'the Moon': 
@@ -50,7 +50,7 @@ def app():
         cel = ephem.Neptune()
     else: out = 'Something else'
     
-    cel.compute(observer)
+    cel.compute(origin)
  
     cel_azimuth = float(cel.az)*180/np.pi
     cel_altitude = float(cel.alt)*180/np.pi
@@ -64,7 +64,7 @@ def app():
     st.write(f"{selection}'s Sub-Latitude: ", sub_cel[0], f"{selection}'s Sub-Longitude: ", sub_cel[1] )
 
     obloc = zf.revpolar(sub_cel[1],sub_cel[0],float(h_az),dist)
-    st.write(f"Observer's Location is Latitude: ", obloc[1], f" Longitude: ", obloc[0] )
+    st.write(f"Observer's Location is Latitude: ", obloc[1], f" Longitude: ", obloc[0])
     
     st.write(f'here {selection} is: ', zf.sub_cel(selection))
     
