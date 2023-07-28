@@ -5,7 +5,7 @@ from datetime import datetime, timezone, timedelta
 import folium
 from streamlit_folium import folium_static
 from folium import plugins
-from apps import z_functions as zf
+from apps import z_functions as zf 
 import ephem
 def app():
     # title of the app
@@ -51,6 +51,7 @@ def app():
     else: out = 'Something else'
     
     cel.compute(observer)
+ 
     cel_azimuth = float(cel.az)*180/np.pi
     cel_altitude = float(cel.alt)*180/np.pi
     
@@ -64,6 +65,8 @@ def app():
 
     obloc = zf.revpolar(sub_cel[1],sub_cel[0],float(h_az),dist)
     st.write(f"Observer's Location is Latitude: ", obloc[1], f" Longitude: ", obloc[0] )
+    
+    st.write(f'here {selection} is: ', zf.sub_cel(selection))
     
 
 

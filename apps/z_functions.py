@@ -289,7 +289,7 @@ asin = math.asin
 degrees = math.degrees
 
 def subsolar(utc):
-    ye, mo, da, ho, mi, se = utc
+    ye, mo, da, ho, mi, se = utc 
     ta = pi * 2
     ut = ho + mi / 60 + se / 3600
     t = 367 * ye - 7 * (ye + (mo + 9) // 12) // 4
@@ -322,4 +322,43 @@ def revpolar(P2lon,P2lat,P1az,dist):
         
     if backaz < 0: backaz = backaz + 360
     #st.write(endlon, endlat, backaz)
-    return [endlon, endlat, backaz]
+    return [endlon, endlat, backaz] 
+
+import ephem
+
+def sub_cel(cel_ob):
+    observer = ephem.Observer()
+    observer.lat = '0'  # Example latitude (London, United Kingdom)
+    observer.lon = '0'
+    if cel_ob == 'the Sun': 
+        cel = ephem.Sun()
+    elif cel_ob == 'the Moon': 
+        cel = ephem.Moon()
+    elif cel_ob == 'Polaris': 
+        cel = ephem.star('Polaris') # https://theskylive.com/sky/stars/polaris-alpha-ursae-minoris-star
+    elif cel_ob == 'Mercury': 
+        cel = ephem.Mercury() # https://theskylive.com/where-is-mercury
+    elif cel_ob == 'Venus': 
+        cel = ephem.Venus()
+    elif cel_ob == 'Mars': 
+        cel = ephem.Mars()
+    elif cel_ob == 'Jupiter': 
+        cel = ephem.Jupiter()
+    elif cel_ob == 'Saturn': 
+        cel = ephem.Saturn()
+    elif cel_ob == 'Uranus': 
+        cel = ephem.Uranus()
+    elif cel_ob == 'Neptune': 
+        cel = ephem.Neptune()
+    else: out = 'Something else'
+    
+    cel.compute(observer)
+    cel_azimuth = float(cel.az)*180/np.pi
+    cel_altitude = float(cel.alt)*180/np.pi
+    
+    sub_cel_dist = 40050*(90-cel_altitude)/360*1000
+    
+    sub_cel = polar2LL(0,0,cel_azimuth,sub_cel_dist)
+    
+
+    return [cel_ob,sub_cel[1],sub_cel[0]]
