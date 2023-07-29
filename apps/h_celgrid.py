@@ -9,19 +9,22 @@ from apps import z_functions as zf
 import ephem
 def app():
     # title of the app
-    options = ['the Sun','the Moon','Polaris','Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune']
-    selection = st.selectbox("Celestial Object", options)
-    st.markdown(f'Get your position from your direction and altitude to {selection}.')
-    if 'h_time' not in st.session_state: st.session_state['h_time'] = ephem.Date(datetime.now(timezone.utc))
-    h_time = st.session_state['h_time']
-    if st.button('Now'):
-        h_time = ephem.Date(datetime.now(timezone.utc))
-    h_time = st.text_input('UTC Time',h_time)
-    st.session_state['h_time'] = h_time
-    st.write(str(h_time)+'UTC')
-
-    h_az = st.number_input(f'Azimuth degrees to {selection}: ', 0.00,360.00,45.00)
-    h_alt = st.number_input(f'Altitude degrees to {selection}: ',-90.00,90.00,45.00)
+    c1,c2 = st.columns((1,1))
+    with c1:
+        options = ['the Sun','the Moon','Polaris','Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune']
+        selection = st.selectbox("Celestial Object", options)
+        
+        if 'h_time' not in st.session_state: st.session_state['h_time'] = ephem.Date(datetime.now(timezone.utc))
+        h_time = st.session_state['h_time']
+        if st.button('Now'):
+            h_time = ephem.Date(datetime.now(timezone.utc))
+        h_time = st.text_input('UTC Time',h_time)
+        st.session_state['h_time'] = h_time
+        st.write(str(h_time)+'UTC')
+    with c2:
+        st.markdown(f'Get your position from your direction and altitude to {selection}.')
+        h_az = st.number_input(f'Azimuth degrees to {selection}: ', 0.00,360.00,45.00)
+        h_alt = st.number_input(f'Altitude degrees to {selection}: ',-90.00,90.00,45.00)
 
     # https://theskylive.com/planetarium?obj=moon#ra|9.854204231576311|dec|32.20240956176751|fov|50
 
