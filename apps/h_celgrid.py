@@ -11,6 +11,15 @@ def app():
     # title of the app
     c1,c2 = st.columns((1,1))
     with c1:
+        lu = st.sidebar.text_input('Lookup: ') 
+        if len(lu)>=3:
+            where = zf.lookup(lu)
+            st.sidebar.write(where[0])
+            st.sidebar.write('Lat: '+str(where[1])+' Lon: '+str(where[2]))
+            st.sidebar.write('MGRS: '+where[3])
+            alt = zf.elevation(where[1],where[2])
+            st.sidebar.write('Alt :'+str(round(alt,2))+' Meters')
+
         options = ['the Sun','the Moon','Polaris','Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune']
         selection = st.selectbox("Celestial Object", options)
         
