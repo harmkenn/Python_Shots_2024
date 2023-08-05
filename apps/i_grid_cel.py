@@ -68,8 +68,8 @@ def app():
     cel.compute(origin)
     
     with c2:
-        st.write(f"Azimuth to {selection}: ",cel.az*180/np.pi)
-        st.write(f"Altitude to {selection}: ",cel.alt*180/np.pi)
+        st.write(f"Azimuth to {selection}: ",str(cel.az*180/np.pi))
+        st.write(f"Altitude to {selection}: ",str(cel.alt*180/np.pi))
 
     cel_dist = 40050*(90-cel.alt*180/np.pi)/360
     sub_cel = zf.polar2LL(ob_ll[1],ob_ll[2],cel.az*180/np.pi,cel_dist)
