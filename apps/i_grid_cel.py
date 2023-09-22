@@ -31,15 +31,17 @@ def app():
         st.session_state['h_time'] = h_time
         st.write(str(h_time)+'UTC')
     with c2:
-        st.markdown(f'Get your position from your direction and altitude to {selection}.')
-        h_az = st.number_input(f'Azimuth degrees to {selection}: ', 0.00,360.00,45.00)
-        h_alt = st.number_input(f'Altitude degrees to {selection}: ',-90.00,90.00,45.00)
+        st.markdown(f"Get the azimuth and altitude to {selection} from the observer's Location")
+        ob_mgrs = st.text_input(f"Observer's MGRS Location: ", '32TPR9792346676')
+        ob_ll = zf.MGRS2LL(ob_mgrs)
+        st.write(f"Observer's Coordinates: (", str(ob_ll[1]),", ", str(ob_ll[2]),")")
+        
 
     # https://theskylive.com/planetarium?obj=moon#ra|9.854204231576311|dec|32.20240956176751|fov|50
 
     origin = ephem.Observer()
-    origin.lat = '0'  # Example latitude (London, United Kingdom)
-    origin.lon = '0'
+    origin.lat = ob_ll[1]*np.pi/180
+    origin.lon = ob_ll[2]*np.pi/180
     if selection == 'the Sun': 
         cel = ephem.Sun()
     elif selection == 'the Moon': 
@@ -62,29 +64,21 @@ def app():
         cel = ephem.Neptune()
     else: out = 'Something else'
     
+    now = ephem.now()
     cel.compute(origin)
- 
-    cel_azimuth = float(cel.az)*180/np.pi
-    cel_altitude = float(cel.alt)*180/np.pi
     
-    cel_dist = 40050*(90-cel_altitude)/360
-    dist = 40050*(90-h_alt)/360*1000
-    #st.write(f'sub-Celestial distace from observer: ', cel_dist)
-    #st.write(f"{selection}'s Azimuth from 0,0:", cel_azimuth)
-    #st.write(f"{selection}'s Altitude from 0,0:", cel_altitude)
-    sub_cel = zf.polar2LL(0,0,cel_azimuth,cel_dist)
-    st.write(f"{selection}'s Sub-Coordinates: (", str(sub_cel[0]), f",", str(sub_cel[1]), f') and ',zf.LL2MGRS(sub_cel[0],sub_cel[1])[1]  )
+    with c2:
+        st.write(f"Azimuth to {selection}: ",str(cel.az*180/np.pi))
+        st.write(f"Altitude to {selection}: ",str(cel.alt*180/np.pi))
 
-    obloc = zf.revpolar(sub_cel[1],sub_cel[0],float(h_az),dist)
-    st.write(f"Observer's Coordinates: (", str(obloc[1]), f",", str(obloc[0]), f') and ',zf.LL2MGRS(obloc[1],obloc[0])[1]  )
+    cel_dist = 40050*(90-cel.alt*180/np.pi)/360
+    sub_cel = zf.polar2LL(ob_ll[1],ob_ll[2],cel.az*180/np.pi,cel_dist)
     
-    #st.write(f'here {selection} is: ', zf.sub_cel(selection))
-    
-    
+
     sslat = sub_cel[0]  
     sslon = sub_cel[1]
-    melat = obloc[1]
-    melon = obloc[0]     
+    melat = ob_ll[1]
+    melon = ob_ll[2]     
     # map
     map = folium.Map(location=[0, 0], zoom_start=1)
     # add tiles to map
