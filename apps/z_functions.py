@@ -7,7 +7,7 @@ import json
 import pygeodesy as pg
 import math 
 
-nd = pd.read_csv('../data/northdes.csv')
+nd = pd.read_csv('data/northdes.csv')
 
 def getIndexes(dfObj, value):
     ''' Get index positions of value in dataframe i.e. dfObj.'''
