@@ -7,7 +7,7 @@ import json
 import pygeodesy as pg
 import math 
 
-nd = pd.read_csv('data/northdes.csv')
+nd = pd.read_csv('../data/northdes.csv')
 
 def getIndexes(dfObj, value):
     ''' Get index positions of value in dataframe i.e. dfObj.'''
@@ -215,9 +215,9 @@ def P2P(lat1d,lon1d,lat2d,lon2d):
     p2pdata = start_point.distanceTo3(end_point)
 
     # six different distances
-    dist = pg.cosineForsytheAndoyerLambert(lat1d,lon1d,lat2d,lon2d) # This is the best one   
+    #dist = pg.cosineForsytheAndoyerLambert(lat1d,lon1d,lat2d,lon2d) # This is the best one   
     
-    return [p2pdata[1],p2pdata[2],dist]
+    return [p2pdata[1],p2pdata[2],pspdata[0]]
 
 def sunpos(when, location, refraction):
 # Extract the passed data
