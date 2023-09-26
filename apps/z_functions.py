@@ -207,14 +207,17 @@ def polar2LL(lat,lon,dir,dist):
     return [lated, loned, impd,latmd,lonmd]
 
 def P2P(lat1d,lon1d,lat2d,lon2d):
-    lbd = pg.bearing(lat1d,lon1d,lat2d,lon2d) #Launch Bearing in degrees
-    ibd = pg.bearing(lat2d,lon2d,lat1d,lon1d)-180 #impact Bearing in degrees
-    if ibd < 0: ibd = ibd + 360
+    from pygeodesy import ellipsoidalVincenty as ev
+
+    # Define the coordinates of the two points
+    start_point = ev.LatLon(lat1d,lon1d)  
+    end_point = ev.LatLon(lat2d,lon2d)  
+    p2pdata = start_point.distanceTo3(end_point)
 
     # six different distances
     dist = pg.cosineForsytheAndoyerLambert(lat1d,lon1d,lat2d,lon2d) # This is the best one   
     
-    return [lbd,ibd,dist]
+    return [p2pdata[1],p2pdata[2],dist]
 
 def sunpos(when, location, refraction):
 # Extract the passed data
