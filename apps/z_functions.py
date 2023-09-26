@@ -217,7 +217,7 @@ def P2P(lat1d,lon1d,lat2d,lon2d):
     # six different distances
     #dist = pg.cosineForsytheAndoyerLambert(lat1d,lon1d,lat2d,lon2d) # This is the best one   
     
-    return [p2pdata[1],p2pdata[2],pspdata[0]]
+    return [p2pdata[1],p2pdata[2],p2pdata[0]]
 
 def sunpos(when, location, refraction):
 # Extract the passed data
