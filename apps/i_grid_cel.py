@@ -82,8 +82,9 @@ def app():
     # map
     map = folium.Map(location=[0, 0], zoom_start=1)
     # add tiles to map
+    attribution = "Map tiles by Google"
     folium.raster_layers.TileLayer('Open Street Map').add_to(map)
-    folium.raster_layers.TileLayer('Stamen Terrain').add_to(map)
+    folium.raster_layers.TileLayer('Stamen Terrain', attr=attribution).add_to(map)
     # Add custom base maps to folium
     folium.raster_layers.TileLayer(
             tiles = 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
