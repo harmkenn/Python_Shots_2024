@@ -361,6 +361,7 @@ def LLDist(lat1d,lon1d,lat2d,lon2d):
         σ = arctan2(sinσ,cosσ)
         sinα = cos(U1)*cos(U2)*sin(lam) / sinσ
         cos2α = 1 - sinα**2
+        if cos2α == 0: cos2α = .000000000001
         cos2σm = cosσ - 2*sin(U1)*sin(U2) / cos2α
         C = f/16*cos2α*(4+f*(4-3*cos2α))
         lam = L+(1-C)*f*sinα*(σ+C*sinσ*(cos2σm+C*cosσ*(-1+2*cos2σm**2)))
