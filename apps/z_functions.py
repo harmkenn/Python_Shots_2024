@@ -32,7 +32,7 @@ def LL2MGRS(lat,lon):
     hem = 'N'
     if lat<0: hem = 'S'
     # convert to radians
-    pi = pi
+    
     latr = lat*pi/180
     lonr = lon*pi/180
     
@@ -295,10 +295,10 @@ def subsolar(utc):
     ec = t + 0.0003490658504 * sin(2 * sa)
     ob = 0.4090877234 - 0.000000006981317008 * dn
     st = 4.894961213 + 6.300388099 * dn
-    ra = atan2(cos(ob) * sin(ec), cos(ec))
-    de = asin(sin(ob) * sin(ec))
-    la = degrees(de)
-    lo = degrees(ra - st) % 360
+    ra = arctan2(cos(ob) * sin(ec), cos(ec))
+    de = arcsin(sin(ob) * sin(ec))
+    la = de*180/pi
+    lo = (ra - st)*180/pi % 360
     lo = lo - 360 if lo > 180 else lo
     return [round(la, 6), round(lo, 6)]
 
