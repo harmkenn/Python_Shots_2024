@@ -1,5 +1,6 @@
 import streamlit as st
-import numpy as np
+#import numpy as np
+from numpy import sqrt,pi,cos,sin,tan,arctan,arctan2,floor,exp,arcsin
 import pandas as pd
 import requests
 import urllib.request
@@ -31,7 +32,7 @@ def LL2MGRS(lat,lon):
     hem = 'N'
     if lat<0: hem = 'S'
     # convert to radians
-    pi = np.pi
+    pi = pi
     latr = lat*pi/180
     lonr = lon*pi/180
     
@@ -40,17 +41,17 @@ def LL2MGRS(lat,lon):
     a = 6378137 # Equitorial Radius
     b = 6356752.31424518 #Polar Radius
     k0 = .9996 #Scalar Factor Constant
-    gzen = np.floor(1/6*lon)+31 #Longitude Zone
+    gzen = floor(1/6*lon)+31 #Longitude Zone
     Czone = 6*gzen - 183 #Longitude of the center of the zone
     dlon = lon - Czone # Longitude from the center of the zone
     p = dlon*3600/10000 #Hecta seconds?
-    e = np.sqrt(1-(b/a)**2) #eccentricity
-    e1 = np.sqrt(a**2-b**2)/b
+    e = sqrt(1-(b/a)**2) #eccentricity
+    e1 = sqrt(a**2-b**2)/b
     e1sq = e1**2
     c = a**2/b
-    nu = a/np.sqrt(1-(e*np.sin(latr))**2) #r curv 2
-    Kiv = nu*np.cos(latr)*sec1*k0*10000 #Coef for UTM 4
-    Kv = (sec1*np.cos(latr))**3*(nu/6)*(1-np.tan(latr)**2+e1sq*np.cos(latr)**2)*k0*10**12 #Coef for UTM 5
+    nu = a/sqrt(1-(e*sin(latr))**2) #r curv 2
+    Kiv = nu*cos(latr)*sec1*k0*10000 #Coef for UTM 4
+    Kv = (sec1*cos(latr))**3*(nu/6)*(1-tan(latr)**2+e1sq*cos(latr)**2)*k0*10**12 #Coef for UTM 5
     Easting = 500000+Kiv*p+Kv*p**3
     
     # Now let's go find Northing
@@ -60,22 +61,22 @@ def LL2MGRS(lat,lon):
     C0 = (15*a*n**2/16)*(1-n+(3*n**2/4)*(1-n)) # Meridional Arc Length
     D0 = (35*a*n**3/48)*(1-n+11*n**2/16) # Meridional Arc Length
     E0 = (315*a*n**4/51)*(1-n) # Meridional Arc Length
-    S = A0*latr - B0*np.sin(2*latr) + C0*np.sin(4*latr) - D0*np.sin(6*latr) + E0*np.sin(8*latr) # Meridional Arc
+    S = A0*latr - B0*sin(2*latr) + C0*sin(4*latr) - D0*sin(6*latr) + E0*sin(8*latr) # Meridional Arc
     Ki = S*k0 #Coef for UTM 1
-    Kii = nu*np.sin(latr)*np.cos(latr)*sec1**2*k0*100000000/2 #Coef for UTM 2
-    Kiii = ((sec1**4*nu*np.sin(latr)*np.cos(latr)**3)/24)*(5-np.tan(latr)**2+9*e1sq*np.cos(latr)**2*np.cos(latr)**4)*k0*10**16 #Coef for UTM 2
+    Kii = nu*sin(latr)*cos(latr)*sec1**2*k0*100000000/2 #Coef for UTM 2
+    Kiii = ((sec1**4*nu*sin(latr)*cos(latr)**3)/24)*(5-tan(latr)**2+9*e1sq*cos(latr)**2*cos(latr)**4)*k0*10**16 #Coef for UTM 2
     Northing = Ki + Kii * p**2 + Kiii * p**4
     if lat < 0: Northing = 10000000 + Northing # In the Southern Hemisphere is Northing is measured from the south pole instead of from the equator
   
-    Easting = int(np.floor(Easting)) # 6 digit easting
-    Northing = int(np.floor(Northing)) # 7 or 8 digit northing
+    Easting = int(floor(Easting)) # 6 digit easting
+    Northing = int(floor(Northing)) # 7 or 8 digit northing
     
     ## Now let's turn UTM into MGRS
     gzoe = 'Odd' 
     if gzen % 2 == 0: gzoe = 'Even' # longitude grid zone
     
-    gsen = int(np.floor(Easting/100000)) #Grab off the first digit off the Easting
-    gsnn = int(np.floor(Northing/100000)) #Grab off the first two digits off the Northing
+    gsen = int(floor(Easting/100000)) #Grab off the first digit off the Easting
+    gsnn = int(floor(Northing/100000)) #Grab off the first two digits off the Northing
     if gzoe =='Even': gsnn = gsnn + 5
     #ck gridsquare letters
     ckgsn = ['A','B','C','D','E','F','G','H','J','K','L','M','N','P','Q','R','S','T','U','V'] # northing grid square letter
@@ -112,11 +113,11 @@ def MGRS2LL(mgrs):
     # grid square easting letters data frame
     gseldf = pd.DataFrame({1:['A','J','S'],2:['B','K','T'],3:['C','L','U'],4:['D','M','V'],5:['E','N','W'],6:['F','P','X'],7:['G','Q','Y'],8:['H','R','Z']},index=[1,2,0])
     
-    sec1 = np.pi/(180*3600) #One Second
+    sec1 = pi/(180*3600) #One Second
     a = 6378137 # Equitorial Radius
     b = 6356752.31424518 #Polar Radius
     k0 = .9996 #Scalar Factor Constant
-    e1 = np.sqrt(a**2-b**2)/b
+    e1 = sqrt(a**2-b**2)/b
     e1sq = e1**2
     c = a**2/b
     
@@ -135,28 +136,28 @@ def MGRS2LL(mgrs):
     NfEQ = Northing
     if hem == 'S': NfEQ = Northing - 10000000
     Fi = (NfEQ)/(6366197.724*k0)
-    Ni = (c/(1+e1sq*(np.cos(Fi))**2)**(1/2))*k0
+    Ni = (c/(1+e1sq*(cos(Fi))**2)**(1/2))*k0
     Czone = 6*gzen-183
     dln = (Easting-500000)/Ni
-    A1 = np.sin(2*Fi)
-    A2 = A1*(np.cos(Fi))**2
+    A1 = sin(2*Fi)
+    A2 = A1*(cos(Fi))**2
     J2 = Fi+(A1/2)
     J4 = (3*J2+A2)/4
-    J6 = (5*J4+A2*(np.cos(Fi))**2)/3
+    J6 = (5*J4+A2*(cos(Fi))**2)/3
     alfa = 3/4*e1sq
     beta = 5/3*alfa**2
     gamma = 35/27*alfa**3
     Bfi = k0*c*(Fi-(alfa*J2)+(beta*J4)-(gamma*J6))
     BB = (NfEQ-Bfi)/Ni
-    zeta = ((e1sq*dln**2)/2)*(np.cos(Fi))**2
+    zeta = ((e1sq*dln**2)/2)*(cos(Fi))**2
     Xi = dln*(1-(zeta/3))
     Eta = BB*(1-zeta)+Fi
-    ShXi = (np.exp(Xi)-np.exp(-Xi))/2
-    dLam = np.arctan(ShXi/np.cos(Eta))
-    Tau = np.arctan(np.cos(dLam)*np.tan(Eta))
-    FiR = Fi+(1+e1sq*(np.cos(Fi))**2-(3/2)*e1sq*np.sin(Fi)*np.cos(Fi)*(Tau-Fi))*(Tau-Fi)
-    lat = FiR/np.pi*180
-    lon = dLam/np.pi*180+Czone
+    ShXi = (exp(Xi)-exp(-Xi))/2
+    dLam = arctan(ShXi/cos(Eta))
+    Tau = arctan(cos(dLam)*tan(Eta))
+    FiR = Fi+(1+e1sq*(cos(Fi))**2-(3/2)*e1sq*sin(Fi)*cos(Fi)*(Tau-Fi))*(Tau-Fi)
+    lat = FiR/pi*180
+    lon = dLam/pi*180+Czone
     
     return [str(gzen)+str(gznl)+' '+str(Easting).rjust(6, "0")+' '+str(Northing).rjust(8, "0"),lat,lon]
     
@@ -176,33 +177,33 @@ def elevation(lat, lng):
 
 def polar2LL(lat,lon,dir,dist):
     # to radians
-    latr = lat*np.pi/180
-    lonr = lon*np.pi/180
-    dirr = dir*np.pi/180
+    latr = lat*pi/180
+    lonr = lon*pi/180
+    dirr = dir*pi/180
     er = 6371 #Earth Radius in km
     delta = dist/er
     
-    later = np.arcsin(np.sin(latr)*np.cos(delta)+np.cos(latr)*np.sin(delta)*np.cos(dirr))
-    loner = lonr + np.arctan2(np.sin(dirr)*np.sin(delta)*np.cos(latr),np.cos(delta)-np.sin(latr)*np.sin(later))
+    later = arcsin(sin(latr)*cos(delta)+cos(latr)*sin(delta)*cos(dirr))
+    loner = lonr + arctan2(sin(dirr)*sin(delta)*cos(latr),cos(delta)-sin(latr)*sin(later))
     
     # Back to Degrees
-    lated = later*180/np.pi
-    loned = loner*180/np.pi
+    lated = later*180/pi
+    loned = loner*180/pi
     
     # Impact Bearing in Radians
-    impr = np.pi + np.arctan2(np.sin(lonr-loner)*np.cos(latr),np.cos(later)*np.sin(latr)-np.sin(later)*np.cos(latr)*np.cos(lonr-loner))
+    impr = pi + arctan2(sin(lonr-loner)*cos(latr),cos(later)*sin(latr)-sin(later)*cos(latr)*cos(lonr-loner))
     
     # Impact Bearing in Degrees
-    impd = impr*180/np.pi
+    impd = impr*180/pi
     
     # compute the midpoint in Radians
-    Bx = np.cos(later)*np.cos(loner-lonr)
-    By = np.cos(later)*np.sin(loner-lonr)
-    latmr = np.arctan2(np.sin(latr) + np.sin(later), np.sqrt((np.cos(latr)+Bx)**2+By**2))
-    lonmr = lonr + np.arctan2(By, np.cos(latr) + Bx)
+    Bx = cos(later)*cos(loner-lonr)
+    By = cos(later)*sin(loner-lonr)
+    latmr = arctan2(sin(latr) + sin(later), sqrt((cos(latr)+Bx)**2+By**2))
+    lonmr = lonr + arctan2(By, cos(latr) + Bx)
     # midpoint in degrees
-    latmd = latmr*180/np.pi
-    lonmd = lonmr*180/np.pi
+    latmd = latmr*180/pi
+    lonmd = lonmr*180/pi
     
     return [lated, loned, impd,latmd,lonmd]
 
@@ -282,15 +283,6 @@ def into_range(x, range_min, range_max):
     delta = range_max - range_min
     return (((shiftedx % delta) + delta) % delta) + range_min
 
-import math
-
-pi = math.pi
-atan2 = math.atan2
-cos = math.cos
-sin = math.sin
-asin = math.asin
-degrees = math.degrees
-
 def subsolar(utc):
     ye, mo, da, ho, mi, se = utc 
     ta = pi * 2
@@ -357,8 +349,8 @@ def sub_cel(cel_ob):
     else: out = 'Something else'
     
     cel.compute(observer)
-    cel_azimuth = float(cel.az)*180/np.pi
-    cel_altitude = float(cel.alt)*180/np.pi
+    cel_azimuth = float(cel.az)*180/pi
+    cel_altitude = float(cel.alt)*180/pi
     
     sub_cel_dist = 40050*(90-cel_altitude)/360
     
