@@ -5,7 +5,7 @@ import pandas as pd
 import folium
 from streamlit_folium import folium_static
 from folium import plugins
-import numpy as np
+from numpy import log, pi, sin, arctan, cos, array, tan
 from scipy.optimize import curve_fit
 import plotly.express as px
 from apps import z_functions as zf
@@ -65,15 +65,15 @@ def app():
     if len(d_lpmgrs)>3 and len(d_ipmgrs)>3:
         
         with c1:
-            deets = zf.P2P(lp[1],lp[2],ip[1],ip[2])
-            st.write('Distance: ' + str(round(deets[2],0)) + ' meters')
-            st.write('Launch Bearing: '+str(round(deets[0],2)) + ' degrees')
-            st.write('Launch Azimuth: '+str(round(deets[0]*3200/180,2)) + ' mils')
-            st.write('Impact Bearing: '+str(round(deets[1],2)) + ' degrees')
-            st.write('Impact Azimuth: '+str(round(deets[1]*3200/180,2)) + ' mils')
+            deets = zf.LLDist(lp[1],lp[2],ip[1],ip[2])
+            st.write('Distance: ' + str(round(deets[0],0)) + ' meters')
+            st.write('Launch Bearing: '+str(round(deets[1],2)) + ' degrees')
+            st.write('Launch Azimuth: '+str(round(deets[1]*3200/180,2)) + ' mils')
+            st.write('Impact Bearing: '+str(round(deets[3],2)) + ' degrees')
+            st.write('Impact Azimuth: '+str(round(deets[3]*3200/180,2)) + ' mils')
         with c2:
             # map
-            map = folium.Map(location=[(lp[1]+ip[1])/2, (lp[2]+ip[2])/2], zoom_start=-1.36*np.log(deets[2]/1000)+15)
+            map = folium.Map(location=[(lp[1]+ip[1])/2, (lp[2]+ip[2])/2], zoom_start=-1.36*log(deets[0]/1000)+15)
             # add tiles to map
             attribution = "Map tiles by Google"
             folium.raster_layers.TileLayer('Open Street Map', attr=attribution).add_to(map)
@@ -128,7 +128,7 @@ def app():
             points = []
             points.append([lp[1],lp[2]])
             for p in range(1,101):
-                get = zf.polar2LL(lp[1],lp[2],deets[0],deets[2]*p/100000)
+                get = zf.polar2LL(lp[1],lp[2],deets[1],deets[0]*p/100000)
                 points.append([get[0],get[1]])
             points.append([ip[1],ip[2]])
             folium.PolyLine(points, color='red').add_to(map)
@@ -141,7 +141,7 @@ def app():
             # display map
             folium_static(map) 
         with c3:
-            rng = round(deets[2],0)
+            rng = round(deets[0],0)
             chrg = st.selectbox('Charge:',['Auto','1L','2L','3H','4H','5H'])
             if chrg == 'Auto':
                 chrg = pd.cut([rng], bins=[-1,2000,5000,8000,12000,15000,25000,99999999], labels=['Too Short','1L','2L','3H','4H','5H','Too Far'])
@@ -155,9 +155,9 @@ def app():
                 ring = ning + 1000
                 sp = d_lpmgrs[:-5]+str(ring).rjust(5, "0")
             spll = zf.MGRS2LL(sp)
-            gd = zf.P2P(spll[1],spll[2],lp[1],lp[2])
+            gd = zf.LLDist(spll[1],spll[2],lp[1],lp[2])
 
-            gdm = gd[0]/180*3200
+            gdm = gd[1]/180*3200
             if gdm > 4800:
                 gdm = gdm - 6400
             if gdm > 1600:
@@ -184,11 +184,11 @@ def app():
             model = LinearRegression()
             model.fit(input_features_poly, y)
             
-            new_data = pd.DataFrame({'Range (M)':[rng]}) #, 'cosAZ':[deets[0]*np.pi/180], 'Galt (M)':[d_lpalt],'Talt (M)':[d_ipalt]
+            new_data = pd.DataFrame({'Range (M)':[rng]}) #, 'cosAZ':[deets[0]*pi/180], 'Galt (M)':[d_lpalt],'Talt (M)':[d_ipalt]
             new_input_features_poly = poly_features.transform(new_data)
             output = model.predict(new_input_features_poly)
             drift = output[0,0]
-            defl = 3200 + int(d_AOF) - deets[0] *3200/180 + drift + gdm
+            defl = 3200 + int(d_AOF) - deets[1] *3200/180 + drift + gdm
             if defl<0: defl = defl + 6400
             
             # Extract the feature and target variables
@@ -205,9 +205,9 @@ def app():
             model.fit(input_features_poly, y)
             
             new_data = pd.DataFrame({'Range (M)':[rng], 
-                                     'sinAZ':[np.sin(deets[0]*np.pi/180)], 
+                                     'sinAZ':[sin(deets[1]*pi/180)], 
                                      'Galt (M)':[d_lpalt], 
-                                     'AOS (mils)':[np.arctan((int(d_ipalt)-int(d_lpalt))/rng)*3200/np.pi]})
+                                     'AOS (mils)':[arctan((int(d_ipalt)-int(d_lpalt))/rng)*3200/pi]})
 
             new_input_features_poly = poly_features.transform(new_data)
             output = model.predict(new_input_features_poly)
@@ -237,7 +237,7 @@ def app():
             
                         
             data = pd.DataFrame({'Range (Meters)':str(int(rng)),
-                                 'Shell':'M795','Charge':chrg, 'Muzzle Velocity (m/s)':str(round(macs['MV (m/s)'].mean(),1)),'Azimuth to Target (mils)':str(round(deets[0]*3200/180 - gdm,0)),
+                                 'Shell':'M795','Charge':chrg, 'Muzzle Velocity (m/s)':str(round(macs['MV (m/s)'].mean(),1)),'Azimuth to Target (mils)':str(round(deets[1]*3200/180 - gdm,0)),
                                  'Grid Declination (mils)':str(round(gdm,1)),'Drift (mils)':str(round(drift,1)),
                                  'Deflection (mils)':str(round(defl,1)), 'QE (mils)':str(round(qe,1)),
                                  'Time of Flight (sec)':str(round(tof,1)), 'Max Ord':str(int(mo))},
@@ -254,8 +254,8 @@ def app():
                 return a * x**3 + b * x**2 + c * x + d
 
             # Define the x and y coordinates of the four points
-            x_data = np.array([0, 200, .6*rng, rng])
-            y_data = np.array([int(d_lpalt), np.tan(qe*np.pi/3200)*200+int(d_lpalt), mo, int(d_ipalt)])
+            x_data = array([0, 200, .6*rng, rng])
+            y_data = array([int(d_lpalt), tan(qe*pi/3200)*200+int(d_lpalt), mo, int(d_ipalt)])
 
             # Use curve_fit to fit the cubic function to the data
             popt, pcov = curve_fit(cubic_function, x_data, y_data)
@@ -284,7 +284,7 @@ def app():
 
             # Example usage
             ss = rng
-            a1 = macs['MV (m/s)'].mean() * np.cos(qe*np.pi/3200)
+            a1 = macs['MV (m/s)'].mean() * cos(qe*pi/3200)
             n1 = int(tof)
 
             ratio = find_ratio(ss, a1, n1) 

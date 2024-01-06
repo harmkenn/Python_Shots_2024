@@ -6,7 +6,7 @@ import requests
 import urllib.request
 import json
 import pygeodesy as pg
-import math 
+import pyproj
 
 nd = pd.read_csv('data/northdes.csv')
 
@@ -207,30 +207,15 @@ def polar2LL(lat,lon,dir,dist):
     
     return [lated, loned, impd,latmd,lonmd]
 
-def P2P(lat1d,lon1d,lat2d,lon2d):
-    from pygeodesy import ellipsoidalVincenty as ev
-
-    # Define the coordinates of the two points
-    start_point = ev.LatLon(lat1d,lon1d)  
-    end_point = ev.LatLon(lat2d,lon2d)  
-    p2pdata = start_point.distanceTo3(end_point)
-
-    # six different distances
-    #dist = pg.cosineForsytheAndoyerLambert(lat1d,lon1d,lat2d,lon2d) # This is the best one   
-    
-    return [p2pdata[1],p2pdata[2],p2pdata[0]]
-
 def sunpos(when, location, refraction):
 # Extract the passed data
     year, month, day, hour, minute, second, timezone = when
     latitude, longitude = location
 # Math typing shortcuts
-    rad, deg = math.radians, math.degrees
-    sin, cos, tan = math.sin, math.cos, math.tan
-    asin, atan2 = math.asin, math.atan2
+
 # Convert latitude and longitude to radians
-    rlat = rad(latitude)
-    rlon = rad(longitude)
+    rlat = latitude*pi/180
+    rlon = longitude*pi/180
 # Decimal hour of the day at Greenwich
     greenwichtime = hour - timezone + minute / 60 + second / 3600
 # Days from J2000, accurate from 1901 to 2099
@@ -255,26 +240,26 @@ def sunpos(when, location, refraction):
 # Obliquity of the ecliptic
     obliquity = 0.4090877234 - 0.000000006981317008 * daynum
 # Right ascension of the sun
-    rasc = atan2(cos(obliquity) * sin(eclip_long), cos(eclip_long))
+    rasc = arctan2(cos(obliquity) * sin(eclip_long), cos(eclip_long))
 # Declination of the sun
-    decl = asin(sin(obliquity) * sin(eclip_long))
+    decl = arcsin(sin(obliquity) * sin(eclip_long))
 # Local sidereal time
     sidereal = 4.894961213 + 6.300388099 * daynum + rlon
 # Hour angle of the sun
     hour_ang = sidereal - rasc
 # Local elevation of the sun
-    elevation = asin(sin(decl) * sin(rlat) + cos(decl) * cos(rlat) * cos(hour_ang))
+    elevation = arcsin(sin(decl) * sin(rlat) + cos(decl) * cos(rlat) * cos(hour_ang))
 # Local azimuth of the sun
-    azimuth = atan2(
+    azimuth = arctan2(
         -cos(decl) * cos(rlat) * sin(hour_ang),
-        sin(decl) - sin(rlat) * sin(elevation),
+        sin(decl) - sin(rlat) * sin(elevation)
     )
 # Convert azimuth and elevation to degrees
-    azimuth = into_range(deg(azimuth), 0, 360)
-    elevation = into_range(deg(elevation), -180, 180)
+    azimuth = into_range(azimuth*180/pi, 0, 360)
+    elevation = into_range(elevation*180/pi, -180, 180)
 # Refraction correction (optional)
     if refraction:
-        targ = rad((elevation + (10.3 / (elevation + 5.11))))
+        targ = (elevation + (10.3 / (elevation + 5.11)))*pi/180
         elevation += (1.02 / tan(targ)) / 60
 # Return azimuth and elevation in degrees
     return (round(azimuth, 2), round(elevation, 2))
@@ -302,8 +287,6 @@ def subsolar(utc):
     lo = lo - 360 if lo > 180 else lo
     return [round(la, 6), round(lo, 6)]
 
-
-import pyproj
 
 def revpolar(P2lon,P2lat,P1az,dist):
     geodesic = pyproj.Geod(ellps='WGS84')
@@ -358,3 +341,40 @@ def sub_cel(cel_ob):
     st.write([0,0,cel_azimuth,sub_cel_dist])
 
     return [cel_ob,sub_cel[1],sub_cel[0]]
+
+def LLDist(lat1d,lon1d,lat2d,lon2d):
+    a=6378137.0
+    f = 1/298.257223563
+    b = (1-f)*a
+    lat1r=lat1d*pi/180
+    lon1r=lon1d*pi/180
+    lat2r=lat2d*pi/180
+    lon2r=lon2d*pi/180
+    U1 = arctan((1-f)*tan(lat1r))
+    U2 = arctan((1-f)*tan(lat2r))
+    L = lon2r-lon1r
+    lam = L
+
+    for i in range(7):
+        sinσ = sqrt((cos(U2)*sin(lam))**2+(cos(U1)*sin(U2)-sin(U1)*cos(U2)*cos(lam))**2)
+        cosσ = sin(U1)*sin(U2)+cos(U1)*cos(U2)*cos(lam)
+        σ = arctan2(sinσ,cosσ)
+        sinα = cos(U1)*cos(U2)*sin(lam) / sinσ
+        cos2α = 1 - sinα**2
+        cos2σm = cosσ - 2*sin(U1)*sin(U2) / cos2α
+        C = f/16*cos2α*(4+f*(4-3*cos2α))
+        lam = L+(1-C)*f*sinα*(σ+C*sinσ*(cos2σm+C*cosσ*(-1+2*cos2σm**2)))
+
+    u2 = cos2α*(a**2/b**2-1)
+    A = 1+u2/16384*(4096+u2*(-768+u2*(320-175*u2)))
+    B = u2/1024*(256+u2*(-128+u2*(74-47*u2)))
+    Δσ = B*sinσ*(cos2σm+B/4*(cosσ*(-1+2*cos2σm**2)-B/6*cos2σm*(-3+4*sinσ**2)*(-3+4*cos2σm**2)))
+    dist = b*A*(σ-Δσ)
+
+    faz = arctan2(sin(lon2r-lon1r)*cos(lat1r),cos(lat1r)*sin(lat2r)-sin(lat1r)*cos(lat2r)*cos(lon2r-lon1r))
+    fazd = (faz*180/pi+360)%360
+    baz = arctan2(sin(lon1r-lon2r)*cos(lat2r),cos(lat2r)*sin(lat1r)-sin(lat2r)*cos(lat1r)*cos(lon1r-lon2r))
+    bazd = (baz*180/pi+360)%360
+    iazd = (bazd+180)%360
+
+    return [dist,fazd,bazd,iazd]

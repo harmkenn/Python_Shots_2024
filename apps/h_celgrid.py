@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
+from numpy import pi
 from datetime import datetime, timezone, timedelta
 import folium
 from streamlit_folium import folium_static
@@ -64,8 +64,8 @@ def app():
     
     cel.compute(origin)
  
-    cel_azimuth = float(cel.az)*180/np.pi
-    cel_altitude = float(cel.alt)*180/np.pi
+    cel_azimuth = float(cel.az)*180/pi
+    cel_altitude = float(cel.alt)*180/pi
     
     cel_dist = 40050*(90-cel_altitude)/360
     dist = 40050*(90-h_alt)/360*1000

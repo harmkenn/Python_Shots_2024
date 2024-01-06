@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
+from numpy import pi,sin,cos,arcsin,arctan2
 from datetime import datetime, timezone, timedelta
 import folium
 from streamlit_folium import folium_static
@@ -35,16 +35,16 @@ def app():
         azsun = st.number_input('Azimuth to the Sun',0.00,360.00,10.0)
         bazsun = azsun + 180
         vasun = st.number_input('Vertical Angle to the Sun',0.00,90.00,45.00)
-        dist = (90-vasun)/360*2*6371*np.pi
-        sslatr = sslat*np.pi/180
-        sslonr = sslon*np.pi/180
-        bazsunr = bazsun*np.pi/180
+        dist = (90-vasun)/360*2*6371*pi
+        sslatr = sslat*pi/180
+        sslonr = sslon*pi/180
+        bazsunr = bazsun*pi/180
         delta = dist/6371
 
-        melatr = np.arcsin(np.sin(sslatr)*np.cos(delta)+np.cos(sslatr)*np.sin(delta)*np.cos(bazsunr))
-        melat = melatr*180/np.pi
-        melonr = sslonr + np.arctan2(np.sin(bazsunr)*np.sin(delta)*np.cos(sslatr),np.cos(delta)-np.sin(sslatr)*np.sin(melatr))
-        melon = melonr*180/np.pi
+        melatr = arcsin(sin(sslatr)*cos(delta)+cos(sslatr)*sin(delta)*cos(bazsunr))
+        melat = melatr*180/pi
+        melonr = sslonr + arctan2(sin(bazsunr)*sin(delta)*cos(sslatr),cos(delta)-sin(sslatr)*sin(melatr))
+        melon = melonr*180/pi
         fmelon = melon
         if fmelon<-180:
             fmelon = fmelon +360

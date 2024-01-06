@@ -3,7 +3,7 @@ import pandas as pd
 import folium
 from streamlit_folium import folium_static
 from folium import plugins
-import numpy as np
+from numpy import log
 
 from apps import z_functions as zf
 
@@ -40,15 +40,15 @@ def app():
         
         
         with c1:
-            deets = zf.P2P(lp[1],lp[2],ip[1],ip[2])
-            st.write('Distance: ' + str(round(deets[2],0)) + ' meters')
-            st.write('Launch Bearing: '+str(round(deets[0],2)) + ' degrees')
-            st.write('Launch Azimuth: '+str(round(deets[0]*3200/180,2)) + ' mils')
-            st.write('Impact Bearing: '+str(round(deets[1],2)) + ' degrees')
-            st.write('Impact Azimuth: '+str(round(deets[1]*3200/180,2)) + ' mils')
+            deets = zf.LLDist(lp[1],lp[2],ip[1],ip[2])
+            st.write('Distance: ' + str(round(deets[0],0)) + ' meters')
+            st.write('Launch Bearing: '+str(round(deets[1],2)) + ' degrees')
+            st.write('Launch Azimuth: '+str(round(deets[1]*3200/180,2)) + ' mils')
+            st.write('Impact Bearing: '+str(round(deets[3],2)) + ' degrees')
+            st.write('Impact Azimuth: '+str(round(deets[3]*3200/180,2)) + ' mils')
         with c2:
             # map
-            map = folium.Map(location=[(lp[1]+ip[1])/2, (lp[2]+ip[2])/2], zoom_start=-1.36*np.log(deets[2]/1000)+15)
+            map = folium.Map(location=[(lp[1]+ip[1])/2, (lp[2]+ip[2])/2], zoom_start=-1.36*log(deets[0]/1000)+15)
             # add tiles to map
             attribution = "Map tiles by Google"
             folium.raster_layers.TileLayer('Open Street Map', attr=attribution).add_to(map)

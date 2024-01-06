@@ -1,6 +1,5 @@
 import streamlit as st
-import pandas as pd
-import numpy as np
+from numpy import pi
 from datetime import datetime, timezone, timedelta
 import folium
 from streamlit_folium import folium_static
@@ -40,8 +39,8 @@ def app():
     # https://theskylive.com/planetarium?obj=moon#ra|9.854204231576311|dec|32.20240956176751|fov|50
 
     origin = ephem.Observer()
-    origin.lat = ob_ll[1]*np.pi/180
-    origin.lon = ob_ll[2]*np.pi/180
+    origin.lat = ob_ll[1]*pi/180
+    origin.lon = ob_ll[2]*pi/180
     if selection == 'the Sun': 
         cel = ephem.Sun()
     elif selection == 'the Moon': 
@@ -68,11 +67,11 @@ def app():
     cel.compute(origin)
     
     with c2:
-        st.write(f"Azimuth to {selection}: ",str(cel.az*180/np.pi))
-        st.write(f"Altitude to {selection}: ",str(cel.alt*180/np.pi))
+        st.write(f"Azimuth to {selection}: ",str(cel.az*180/pi))
+        st.write(f"Altitude to {selection}: ",str(cel.alt*180/pi))
 
-    cel_dist = 40050*(90-cel.alt*180/np.pi)/360
-    sub_cel = zf.polar2LL(ob_ll[1],ob_ll[2],cel.az*180/np.pi,cel_dist)
+    cel_dist = 40050*(90-cel.alt*180/pi)/360
+    sub_cel = zf.polar2LL(ob_ll[1],ob_ll[2],cel.az*180/pi,cel_dist)
     
 
     sslat = sub_cel[0]  

@@ -3,7 +3,7 @@ import pandas as pd
 import folium
 from streamlit_folium import folium_static
 from folium import plugins
-import numpy as np
+from numpy import pi,poly1d,polyfit,cos,sin
 from sklearn.linear_model import ElasticNet
 from scipy.optimize import curve_fit
 import plotly.express as px
@@ -36,13 +36,13 @@ def app():
         st.session_state['sw'] = sw 
 
         m = sw/2.20462 #mass lbs to kg
-        th0 = qe * np.pi / 3200 # initial angle in radians
+        th0 = qe * pi / 3200 # initial angle in radians
         g = 9.80665 # gravitational force in m/s/s
         
         alt_press = pd.DataFrame({'alt':[0,200,500,1000,1500,2000,2500,3000,3500,4000,4500,5000,6000,7000,8000,9000],
                            'rho':[1.2250,1.2133,1.1844,1.1392,1.0846,1.0320,.9569,.8632,.7768,.6971,.5895,.4664,.3612,.2655,.1937,.1413]})
                             #Air Pressure at differnet altitudes
-        press_M = np.poly1d(np.polyfit(alt_press['alt'], alt_press['rho'], 5)) #Pressure Model for any altitude
+        press_M = poly1d(polyfit(alt_press['alt'], alt_press['rho'], 5)) #Pressure Model for any altitude
 
     with c2:
         pk = .000006 * 46.94681 #This is my predicted k value for the shape of the round.
@@ -60,13 +60,13 @@ def app():
         bv = imv
         while balt >galt-.1:
             bt = bt + .1 #next time
-            br = br + bv*dt*np.cos(bthr) # next range
-            balt = balt + bv*dt*np.sin(bthr) # next alt
-            bthr = bthr - (g*np.cos(bthr)/bv)*dt # next angle in radians
-            bthm = bthr*3200/np.pi
+            br = br + bv*dt*cos(bthr) # next range
+            balt = balt + bv*dt*sin(bthr) # next alt
+            bthr = bthr - (g*cos(bthr)/bv)*dt # next angle in radians
+            bthm = bthr*3200/pi
             bp = press_M(balt) #next pressure
             bk = bp*pk/m # is the drag constant at y alt
-            bv = bv - (np.sin(bthr) + bk*bv**2) * g *dt # next velocity 
+            bv = bv - (sin(bthr) + bk*bv**2) * g *dt # next velocity 
             traj.loc[len(traj)] = [bt,bp,bk*1000000,bv,bthr,bthm,br,balt]  
         st.dataframe(traj)
         fig = px.scatter(x=traj['Range(M)'], y=traj['Alt(M)'])

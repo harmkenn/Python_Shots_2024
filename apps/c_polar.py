@@ -3,7 +3,7 @@ import pandas as pd
 import folium
 from streamlit_folium import folium_static
 from folium import plugins
-import numpy as np
+from numpy import log
 
 from apps import z_functions as zf
 
@@ -49,7 +49,7 @@ def app():
             st.write('Impact Point (LL): '+str(round(deets[0],5))+', '+str(round(deets[1],5)))
         with c2:
             # map
-            map = folium.Map(location=[(lp[1]+deets[0])/2, (lp[2]+deets[1])/2], zoom_start=-1.36*np.log(dmeters/1000)+15)
+            map = folium.Map(location=[(lp[1]+deets[0])/2, (lp[2]+deets[1])/2], zoom_start=-1.36*log(dmeters/1000)+15)
             # add tiles to map
             attribution = "Map tiles by Google"
             folium.raster_layers.TileLayer('Open Street Map', attr=attribution).add_to(map)

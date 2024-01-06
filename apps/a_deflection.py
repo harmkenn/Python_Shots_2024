@@ -121,11 +121,11 @@ def app():
         folium_static(map) 
         
         with c2:
-            deets = zf.P2P(lp[1],lp[2],ip[1],ip[2])
-            st.write('Distance: ' + str(round(deets[2],0)) + ' meters')
-            st.write('Bearing: '+str(round(deets[0],2)) + ' degrees')
-            st.write('Azimuth: '+str(round(deets[0]*3200/180,2)) + ' mils')
-            diff =  round(aof-deets[0]*3200/180+3200,0)
+            deets = zf.LLDist(lp[1],lp[2],ip[1],ip[2])
+            st.write('Distance: ' + str(int(deets[0])) + ' meters')
+            st.write('Bearing: '+str(round(deets[1],2)) + ' degrees')
+            st.write('Azimuth: '+str(round(deets[1]*3200/180,2)) + ' mils')
+            diff =  round(aof-deets[1]*3200/180+3200,0)
             if diff<0: diff = diff + 6400
             st.write('Deflection: '+str(diff)+' mils')
             
