@@ -103,7 +103,7 @@ def app():
             points = []
             points.append([lp[1],lp[2]])
             for p in range(1,101):
-                get = zf.polar2LL(lp[1],lp[2],deets[1],deets[0]*p/100000)
+                get = zf.polar2LL(lp[1],lp[2],deets[1],deets[0]*p/100)
                 points.append([get[0],get[1]])
             points.append([ip[1],ip[2]])
             folium.PolyLine(points, color='red').add_to(map)
