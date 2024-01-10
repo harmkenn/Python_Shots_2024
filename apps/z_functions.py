@@ -381,31 +381,35 @@ def LLDist(lat1d,lon1d,lat2d,lon2d):
 
     return [dist,fazd,bazd,iazd]
 
-def vPolar(lat1d,lon1d,dird,distm):
+def vPolar(lat1d,lon1d,dird,dists):
     # https://en.wikipedia.org/wiki/Vincenty%27s_formulae
     a=6378137.0
     f = 1/298.257223563
     b = (1-f)*a
-    lat1r = lat1d*pi/180
-    lon1r = lon1d*pi/180
-    gα1 = dird*pi/180
-    s = distm
+ 
+    lat1r=lat1d*pi/180
+    lon1r=lon1d*pi/180
+    dirr = dird*pi/180
     U1 = arctan((1-f)*tan(lat1r))
-    gσ1 =arctan2(tan(U1),cos(gα1)) 
-    sinα = cos(U1)*sin(gα1)
-    gα = arcsin(sinα)
-    u2 = cos(gα)**2*(a**2/b**2-1)
-    A = 1+u2/16384*(4096+u2*(-768+u2*(320-175*u2)))
-    B = u2/1024*(256+u2*(-128+u2*(74-47*u2)))
-    gσ = s/b*A
+    sig1 = arctan2(tan(U1),cos(dirr))
+    sinα = cos(U1)*sin(dirr)
+    u2 = (1-sinα**2)*(a**2/b**2-1)
+    k1 = (sqrt(1+u2)-1)/(sqrt(1+u2)+1)
+    A = (1+.25*k1**2)/(1-k1)
+    B = k1*(1-3/8*k1**2)
+    sig = dists/b/A
 
-    for i in range(10):
-        gσm = gσ1+gσ/2
-        gΔσ = B*sin(gσ)*(cos(2*gσm)+B/4*(cos(gσ)*(-1+2*cos(2*gσm)**2)-B/6*cos(2*gσm)*(-3+4*sin(gσ)**2)*(-3+4*cos(2*σm)**2)))
-        gσ = s/b*A+gΔσ
+    for i in range(4):
+        tsm = 2*sig1+sig
+        dsig = B*sin(sig)*(cos(tsm)+B/4*(cos(sig)*(-1+2*cos(tsm))-B/6*cos(tsm)*(-3+4*sin(sig)**2)*(-3+4*cos(tsm)**2)))
+        sig = dists/b/A+dsig
 
-    lat2r = arctan2(sin(U1)*cos(gσ)+cos(U1)*sin(gσ)*cos(gα1),(1-f))*sqrt(sin(gα)**2+(sin(U1)*sin(gσ)-cos(U1)cos(gσ)*cos(gα1))**2)
-    gλ = arctan2(sin(gσ)*sin(gα1),cos(U1)*cos(gσ)-sin(U1)*sin(gσ)*cos(gα1))
-    C = f/16*cos(2*gα)*(4+f*(4-3*cos2α)
+    lat2r = arctan2(sin(U1)*cos(sig)+cos(U1)*sin(sig)*cos(dirr),(1-f)*sqrt(sinα**2+(sin(U1)*sin(sig)-cos(U1)*cos(sig)*cos(dirr))**2))
+    lam = arctan2(sin(sig)*sin(dirr),cos(U1)*cos(sig)-sin(U1)*sin(sig)*cos(dirr))
+    C = f/16*(1-sinα**2)*(4+f*(4-3*(1-sinα**2)))
+    L = lam-(1-C)*f*sinα*(sig+C*sin(sig)*(cos(tsm)+C*cos(sig)*(-1+2*cos(tsm)**2)))
+    lon2r = L+lon1r
+    lat2d = lat2r*180/pi
+    lon2d = lon2r*180/pi
     return [lat2d,lon2d]
 
