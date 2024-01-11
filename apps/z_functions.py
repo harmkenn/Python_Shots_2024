@@ -335,9 +335,9 @@ def sub_cel(cel_ob):
     cel_azimuth = float(cel.az)*180/pi
     cel_altitude = float(cel.alt)*180/pi
     
-    sub_cel_dist = 40050*(90-cel_altitude)/360
+    sub_cel_dist = 40050*(90-cel_altitude)*1000/360
     
-    sub_cel = polar2LL(0,0,cel_azimuth,sub_cel_dist)
+    sub_cel = vPolar(0,0,cel_azimuth,sub_cel_dist)
     st.write([0,0,cel_azimuth,sub_cel_dist])
 
     return [cel_ob,sub_cel[1],sub_cel[0]]
