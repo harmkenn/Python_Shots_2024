@@ -28,7 +28,7 @@ def app():
         lp = zf.MGRS2LL(b_lpmgrs)
         st.write('Launch Point (LL): '+str(round(lp[1],5))+', '+str(round(lp[2],5)))
         
-        if 'b_ipmgrs' not in st.session_state: st.session_state['b_ipmgrs'] = '12RWU9645019206'
+        if 'b_ipmgrs' not in st.session_state: st.session_state['b_ipmgrs'] = '31UDQ5248411718'
         ipmgrs = st.session_state['b_ipmgrs']
         ipmgrs = st.text_input('Impact Point (MGRS):',ipmgrs,key = 'b2')
         st.session_state['b_ipmgrs'] = ipmgrs
@@ -42,6 +42,7 @@ def app():
         with c1:
             deets = zf.LLDist(lp[1],lp[2],ip[1],ip[2])
             st.write('Distance: ' + str(round(deets[0],0)) + ' meters')
+            totalD = deets[0]
             st.write('Launch Bearing: '+str(round(deets[1],2)) + ' degrees')
             st.write('Launch Azimuth: '+str(round(deets[1]*3200/180,2)) + ' mils')
             st.write('Impact Bearing: '+str(round(deets[3],2)) + ' degrees')
@@ -100,12 +101,16 @@ def app():
 
             
         with c2:
+           # st.write(deets)
             points = []
             points.append([lp[1],lp[2]])
-            for p in range(1,101):
-                get = zf.polar2LL(lp[1],lp[2],deets[1],deets[0]*p/100000)
+            td = deets[1]
+            for p in range(0,1000):
+                get = zf.vPolar(points[p][0],points[p][1],td,deets[0]/1000)
                 points.append([get[0],get[1]])
+                td = zf.LLDist(get[0],get[1],ip[1],ip[2])[1]
             points.append([ip[1],ip[2]])
+           # st.write(points)
             folium.PolyLine(points, color='red').add_to(map)
             
             
