@@ -373,9 +373,9 @@ def LLDist(lat1d,lon1d,lat2d,lon2d):
     Δσ = B*sinσ*(cos2σm+B/4*(cosσ*(-1+2*cos2σm**2)-B/6*cos2σm*(-3+4*sinσ**2)*(-3+4*cos2σm**2)))
     dist = b*A*(σ-Δσ)
 
-    faz = arctan2(sin(lon2r-lon1r)*cos(lat1r),cos(lat1r)*sin(lat2r)-sin(lat1r)*cos(lat2r)*cos(lon2r-lon1r))
+    faz = arctan2(sin(lon2r-lon1r)*cos(lat2r),cos(lat1r)*sin(lat2r)-sin(lat1r)*cos(lat2r)*cos(lon2r-lon1r))
     fazd = (faz*180/pi+360)%360
-    baz = arctan2(sin(lon1r-lon2r)*cos(lat2r),cos(lat2r)*sin(lat1r)-sin(lat2r)*cos(lat1r)*cos(lon1r-lon2r))
+    baz = arctan2(sin(lon1r-lon2r)*cos(lat1r),cos(lat2r)*sin(lat1r)-sin(lat2r)*cos(lat1r)*cos(lon1r-lon2r))
     bazd = (baz*180/pi+360)%360
     iazd = (bazd+180)%360
 
