@@ -72,11 +72,12 @@ def app():
     #st.write(f'sub-Celestial distace from observer: ', cel_dist)
     #st.write(f"{selection}'s Azimuth from 0,0:", cel_azimuth)
     #st.write(f"{selection}'s Altitude from 0,0:", cel_altitude)
-    sub_cel = zf.polar2LL(0,0,cel_azimuth,cel_dist)
+    sub_cel = zf.vPolar(0,0,cel_azimuth,cel_dist*1000)
     st.write(f"{selection}'s Sub-Coordinates: (", str(sub_cel[0]), f",", str(sub_cel[1]), f') and ',zf.LL2MGRS(sub_cel[0],sub_cel[1])[1]  )
 
-    obloc = zf.revpolar(sub_cel[1],sub_cel[0],float(h_az),dist)
+    obloc = zf.vPolar(sub_cel[0],sub_cel[1],float(h_az),dist)
     st.write(f"Observer's Coordinates: (", str(obloc[1]), f",", str(obloc[0]), f') and ',zf.LL2MGRS(obloc[1],obloc[0])[1]  )
+    st.write(f"Distance from Observer to Sun's Sub-Coordinates: ", str(dist), ' meters.')
     
     #st.write(f'here {selection} is: ', zf.sub_cel(selection))
     

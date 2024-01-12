@@ -31,14 +31,14 @@ def app():
         st.write('Launch Point (LL): '+str(round(lp[1],5))+', '+str(round(lp[2],5)))
         
         azmils = st.text_input('Azimuth (mils):',1600)
-        dmeters = st.text_input('Distance (meters)',10000)
+        dmeters = st.text_input('Distance (meters)',10000000)
     
     if len(c_lpmgrs)>3 and len(azmils)>1:
         lp = zf.MGRS2LL(c_lpmgrs)
         azdeg = float(azmils)*180/3200
         dmeters = float(dmeters)
         with c1:
-            deets = zf.polar2LL(float(lp[1]),float(lp[2]),azdeg,dmeters/1000)
+            deets = zf.vPolar(float(lp[1]),float(lp[2]),azdeg,dmeters)
             st.write('Distance: ' + str(dmeters) + ' meters')
             st.write('Launch Bearing: '+str(round(azdeg,2)) + ' degrees')
             st.write('Launch Azimuth: '+str(round(float(azmils),2)) + ' mils')
@@ -101,13 +101,20 @@ def app():
 
             
         with c2:
+           # st.write(deets)
             points = []
             points.append([lp[1],lp[2]])
-            for p in range(1,101):
-                get = zf.polar2LL(lp[1],lp[2],azdeg,p*dmeters/100000)
+            st.write(azdeg)
+            td = azdeg
+            
+            for p in range(2):
+                get = zf.vPolar(points[p][0],points[p][1],td,deets[0]/1000)
+                st.write(get)
                 points.append([get[0],get[1]])
+                td=get[2]
             points.append([deets[0],deets[1]])
             folium.PolyLine(points, color='red').add_to(map)
+
             
             
         
@@ -116,6 +123,8 @@ def app():
             draw.add_to(map)
             # display map
             folium_static(map) 
+
+            st.write(td)
             
             
 

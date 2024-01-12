@@ -71,7 +71,8 @@ def app():
         st.write(f"Altitude to {selection}: ",str(cel.alt*180/pi))
 
     cel_dist = 40050*(90-cel.alt*180/pi)/360
-    sub_cel = zf.polar2LL(ob_ll[1],ob_ll[2],cel.az*180/pi,cel_dist)
+    
+    sub_cel = zf.vPolar(ob_ll[1],ob_ll[2],cel.az*180/pi,cel_dist*1000)
     
 
     sslat = sub_cel[0]  

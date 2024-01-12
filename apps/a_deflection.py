@@ -18,11 +18,11 @@ def app():
         if 'a_lon' not in st.session_state: st.session_state['a_lon'] = 30
         lon = st.session_state['a_lon']
         lon = float(st.text_input('Longitude', lon))
-        st.session_state['a_lon'] = lon
+        #st.session_state['a_lon'] = lon
         back = zf.LL2MGRS(lat,lon)
         ip = zf.LL2MGRS(lat+.1,lon+.1)
-        st.write('UTM: ',back[0])
-        st.write('MGRS: ',back[1])
+        #st.write('UTM: ',back[0])
+        #st.write('MGRS: ',back[1])
     with c2:    
                
         lu = st.sidebar.text_input('Lookup: ') 
@@ -53,8 +53,8 @@ def app():
         lp = zf.MGRS2LL(lpmgrs)
         
         ip = zf.MGRS2LL(ipmgrs)
-        st.write('UTM :',ip[0])
-        st.write('Lat: ',str(round(ip[1],4)),' Lon: ',str(round(ip[2],4)))
+        #st.write('UTM :',ip[0])
+        #st.write('Lat: ',str(round(ip[1],4)),' Lon: ',str(round(ip[2],4)))
     with c2:
         # map
         map = folium.Map(location=[lp[1], lp[2]], zoom_start=10)
@@ -105,7 +105,8 @@ def app():
         tgt = folium.features.CustomIcon('Icons/target.png',icon_size=(25,25))
         folium.Marker(location=[lp[1],lp[2]], color='green',popup=lpmgrs, tooltip='Launch Point',icon=pal).add_to(map)
         folium.Marker(location=[ip[1],ip[2]], color='green',popup=ipmgrs, tooltip='Impact Point',icon=tgt).add_to(map)
-        pback = zf.polar2LL(lp[1],lp[2],int(aof)*180/3200,30) 
+        #pback = zf.polar2LL(lp[1],lp[2],int(aof)*180/3200,30) 
+        pback = zf.vPolar(lp[1],lp[2],int(aof)*180/3200,30)
         
         # AOF line
         folium.PolyLine([[lp[1],lp[2]],[pback[0],pback[1]]],tooltip='Azimuth of Fire',popup=aof).add_to(map)

@@ -175,37 +175,7 @@ def elevation(lat, lng):
         response = json.loads(f.read().decode())    
         return response['results'][0]['elevation']
 
-def polar2LL(lat,lon,dir,dist):
-    # to radians
-    latr = lat*pi/180
-    lonr = lon*pi/180
-    dirr = dir*pi/180
-    er = 6371 #Earth Radius in km
-    delta = dist/er
-    
-    later = arcsin(sin(latr)*cos(delta)+cos(latr)*sin(delta)*cos(dirr))
-    loner = lonr + arctan2(sin(dirr)*sin(delta)*cos(latr),cos(delta)-sin(latr)*sin(later))
-    
-    # Back to Degrees
-    lated = later*180/pi
-    loned = loner*180/pi
-    
-    # Impact Bearing in Radians
-    impr = pi + arctan2(sin(lonr-loner)*cos(latr),cos(later)*sin(latr)-sin(later)*cos(latr)*cos(lonr-loner))
-    
-    # Impact Bearing in Degrees
-    impd = impr*180/pi
-    
-    # compute the midpoint in Radians
-    Bx = cos(later)*cos(loner-lonr)
-    By = cos(later)*sin(loner-lonr)
-    latmr = arctan2(sin(latr) + sin(later), sqrt((cos(latr)+Bx)**2+By**2))
-    lonmr = lonr + arctan2(By, cos(latr) + Bx)
-    # midpoint in degrees
-    latmd = latmr*180/pi
-    lonmd = lonmr*180/pi
-    
-    return [lated, loned, impd,latmd,lonmd]
+
 
 def sunpos(when, location, refraction):
 # Extract the passed data
@@ -287,21 +257,6 @@ def subsolar(utc):
     lo = lo - 360 if lo > 180 else lo
     return [round(la, 6), round(lo, 6)]
 
-
-def revpolar(P2lon,P2lat,P1az,dist):
-    geodesic = pyproj.Geod(ellps='WGS84')
-    #st.write(P2lon,P2lat,P1az,dist)
-    P2az = P1az + 180
-    endlon, endlat, backaz = geodesic.fwd(P2lon,P2lat,P2az,dist)
-    
-    #st.write(endlon, endlat, backaz)
-    for i in range(1, 200):
-        P2az = P1az - backaz + P2az
-        endlon, endlat, backaz = geodesic.fwd(P2lon,P2lat,P2az,dist)
-        
-    if backaz < 0: backaz = backaz + 360
-    #st.write(endlon, endlat, backaz)
-    return [endlon, endlat, backaz] 
 
 import ephem
 
@@ -411,5 +366,16 @@ def vPolar(lat1d,lon1d,dird,dists):
     lon2r = L+lon1r
     lat2d = lat2r*180/pi
     lon2d = lon2r*180/pi
-    return [lat2d,lon2d]
+    more = LLDist(lat1d,lon1d,lat2d,lon2d)
+    iazd = more[3]
+    return [lat2d,lon2d,iazd]
 
+def revVpolar(lat2d,lon2d,lazd,distm):
+    bazd = (lazd + 180)%360
+    est_bazd = bazd
+    for i in range(20):
+        est_lazd = (vPolar(lat2d , lon2d,est_bazd ,distm)[2]+180)%360
+        est_bazd = (est_bazd - (est_lazd-lazd))
+    lat1d = vPolar(lat2d , lon2d,est_bazd ,distm)[0]
+    lon1d = vPolar(lat2d , lon2d,est_bazd ,distm)[1]
+    return [lat1d,lon1d, est_bazd, est_lazd]
