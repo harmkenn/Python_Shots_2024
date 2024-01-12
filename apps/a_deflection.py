@@ -21,8 +21,8 @@ def app():
         #st.session_state['a_lon'] = lon
         back = zf.LL2MGRS(lat,lon)
         ip = zf.LL2MGRS(lat+.1,lon+.1)
-        #st.write('UTM: ',back[0])
-        #st.write('MGRS: ',back[1])
+        st.write('UTM: ',back[0])
+        st.write('MGRS: ',back[1])
     with c2:    
                
         lu = st.sidebar.text_input('Lookup: ') 
@@ -53,8 +53,8 @@ def app():
         lp = zf.MGRS2LL(lpmgrs)
         
         ip = zf.MGRS2LL(ipmgrs)
-        #st.write('UTM :',ip[0])
-        #st.write('Lat: ',str(round(ip[1],4)),' Lon: ',str(round(ip[2],4)))
+        st.write('UTM :',ip[0])
+        st.write('Lat: ',str(round(ip[1],4)),' Lon: ',str(round(ip[2],4)))
     with c2:
         # map
         map = folium.Map(location=[lp[1], lp[2]], zoom_start=10)
