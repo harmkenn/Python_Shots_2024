@@ -366,6 +366,7 @@ def vPolar(lat1d,lon1d,dird,dists):
     lon2r = L+lon1r
     lat2d = lat2r*180/pi
     lon2d = lon2r*180/pi
+    if lon2d < -180: lon2d = lon2d+360
     more = LLDist(lat1d,lon1d,lat2d,lon2d)
     iazd = more[3]
     return [lat2d,lon2d,iazd]

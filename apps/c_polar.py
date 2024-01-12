@@ -49,6 +49,8 @@ def app():
             st.write('Impact Point (LL): '+str(round(deets[0],5))+', '+str(round(deets[1],5)))
         with c2:
             # map
+            if deets[1]>lp[2] and azdeg > 180: deets[1] = deets[1] - 360
+            if deets[1]<lp[2] and azdeg < 180: deets[1] = deets[1] + 360
             map = folium.Map(location=[(lp[1]+deets[0])/2, (lp[2]+deets[1])/2], zoom_start=-1.36*log(dmeters/1000)+15)
             # add tiles to map
             attribution = "Map tiles by Google"
@@ -95,36 +97,35 @@ def app():
             # add marker to map https://fontawesome.com/v5.15/icons?d=gallery&p=2&m=free
             pal = folium.features.CustomIcon('Icons/paladin.jpg',icon_size=(30,20))
             tgt = folium.features.CustomIcon('Icons/target.png',icon_size=(25,25))
+            
             folium.Marker(location=[lp[1],lp[2]], color='green',popup=c_lpmgrs, tooltip='Launch Point',icon=pal).add_to(map)
             folium.Marker(location=[deets[0],deets[1]], color='green',popup=ip[1], tooltip='Impact Point',icon=tgt).add_to(map)
             
 
             
         with c2:
-           # st.write(deets)
+
+             # st.write(deets)
             points = []
             points.append([lp[1],lp[2]])
-            st.write(azdeg)
             td = azdeg
             
-            for p in range(2):
-                get = zf.vPolar(points[p][0],points[p][1],td,deets[0]/1000)
-                st.write(get)
+            for p in range(0,1000):
+                get = zf.vPolar(points[p][0],points[p][1],td,dmeters/1000)
+                if azdeg > 180 and points[p][1] > points [p-1][1]: points[p][1] = points[p][1] - 360
                 points.append([get[0],get[1]])
-                td=get[2]
+                td = zf.LLDist(get[0],get[1],deets[0],deets[1])[1]
+            
+            del points[-1]
             points.append([deets[0],deets[1]])
             folium.PolyLine(points, color='red').add_to(map)
-
-            
-            
-        
             
             draw = plugins.Draw()
             draw.add_to(map)
             # display map
             folium_static(map) 
 
-            st.write(td)
+
             
             
 

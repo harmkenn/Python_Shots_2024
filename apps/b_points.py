@@ -41,6 +41,7 @@ def app():
         
         with c1:
             deets = zf.LLDist(lp[1],lp[2],ip[1],ip[2])
+            azdeg = deets[1]
             st.write('Distance: ' + str(round(deets[0],0)) + ' meters')
             totalD = deets[0]
             st.write('Launch Bearing: '+str(round(deets[1],2)) + ' degrees')
@@ -49,7 +50,9 @@ def app():
             st.write('Impact Azimuth: '+str(round(deets[3]*3200/180,2)) + ' mils')
         with c2:
             # map
-            map = folium.Map(location=[(lp[1]+ip[1])/2, (lp[2]+ip[2])/2], zoom_start=-1.36*log(deets[0]/1000)+15)
+            if ip[2]>lp[2] and azdeg > 180: ip[2] = ip[2] - 360
+            if ip[2]<lp[2] and azdeg < 180: ip[2] = ip[2] + 360
+            map = folium.Map(location=[(lp[1]+ip[1])/2, (lp[2]+ip[2])/2], zoom_start=-1.36*log(deets[0]/1000)+14)
             # add tiles to map
             attribution = "Map tiles by Google"
             folium.raster_layers.TileLayer('Open Street Map', attr=attribution).add_to(map)
@@ -98,7 +101,7 @@ def app():
             folium.Marker(location=[lp[1],lp[2]], color='green',popup=b_lpmgrs, tooltip='Launch Point',icon=pal).add_to(map)
             folium.Marker(location=[ip[1],ip[2]], color='green',popup=ipmgrs, tooltip='Impact Point',icon=tgt).add_to(map)
             
-
+ 
             
         with c2:
            # st.write(deets)
@@ -107,8 +110,10 @@ def app():
             td = deets[1]
             for p in range(0,1000):
                 get = zf.vPolar(points[p][0],points[p][1],td,deets[0]/1000)
+                if azdeg > 180 and points[p][1] > points [p-1][1]: points[p][1] = points[p][1] - 360
                 points.append([get[0],get[1]])
                 td = zf.LLDist(get[0],get[1],ip[1],ip[2])[1]
+            del points[-1]
             points.append([ip[1],ip[2]])
            # st.write(points)
             folium.PolyLine(points, color='red').add_to(map)
