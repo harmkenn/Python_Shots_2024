@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from numpy import pi,sin,cos,arcsin,arctan2
+from numpy import pi,sin,cos,arcsin,arctan2,log
 from datetime import datetime, timezone, timedelta
 import folium
 from streamlit_folium import folium_static
@@ -32,7 +32,7 @@ def app():
         sslon = ssloc[1]
         st.write('Sub Solar Point: '+str(ssloc)+' MGRS: '+zf.LL2MGRS(sslat,sslon)[1])
 
-        azsun = st.number_input('Azimuth to the Sun',0.00,360.00,10.0)
+        azsun = st.number_input('Azimuth to the Sun',0.00,360.00,110.0)
         bazsun = azsun + 180
         vasun = st.number_input('Vertical Angle to the Sun',0.00,90.00,45.00)
         dist = (90-vasun)/360*2*6371*pi
@@ -41,20 +41,16 @@ def app():
         bazsunr = bazsun*pi/180
         delta = dist/6371
 
-        melatr = arcsin(sin(sslatr)*cos(delta)+cos(sslatr)*sin(delta)*cos(bazsunr))
-        melat = melatr*180/pi
-        melonr = sslonr + arctan2(sin(bazsunr)*sin(delta)*cos(sslatr),cos(delta)-sin(sslatr)*sin(melatr))
-        melon = melonr*180/pi
-        fmelon = melon
-        if fmelon<-180:
-            fmelon = fmelon +360
-        if fmelon>180:
-            fmelon = fmelon -360
-        st.write('My Location: '+ str(melat) + ', ' + str(fmelon)+ 'MGRS: ' + zf.LL2MGRS(melat,melon)[1])
+        obloc = zf.revVpolar(sslat,sslon,azsun,dist*1000)
+
+        if sslon < obloc[1] and azsun<180: obloc[1] = obloc[1] - 360
+
+        st.write('My Location: '+ str(obloc[0]) + ', ' + str(obloc[0])+ 'MGRS: ' + zf.LL2MGRS(obloc[0],obloc[1])[1])
+        st.write(f"Distance to Sun's Sub-Coordinates: ", str(int(dist*1000)), ' meters.')
         
         
         # map
-        map = folium.Map(location=[0, 0], zoom_start=1)
+        map = folium.Map(location=[0, sslon], zoom_start=-1.36*log(dist)+14)
         # add tiles to map
         attribution = "Map tiles by Google"
         folium.raster_layers.TileLayer('Open Street Map', attr=attribution).add_to(map)
@@ -101,8 +97,22 @@ def app():
         sun = folium.features.CustomIcon('Icons/target.png',icon_size=(30,30))
         folium.Marker(location=[sslat, sslon], color='green', tooltip='SubSolar Point',icon=sun).add_to(map)
         pal = folium.features.CustomIcon('Icons/paladin.jpg',icon_size=(30,20))
-        folium.Marker(location=[melat, melon], color='green', tooltip='my location',icon=pal).add_to(map)
-        folium.PolyLine([[sslat, sslon],[melat,melon]],tooltip='Azimuth').add_to(map)
+        folium.Marker(location=[obloc[0],obloc[1]], color='green', tooltip='my location',icon=pal).add_to(map)
+        
+        points = []
+        points.append([obloc[0],obloc[1]])
+        td = azsun
+        for p in range(0,1000):
+            get = zf.vPolar(points[p][0],points[p][1],td,dist)
+            if azsun < 180 and points[p][1] > sslon: points[p][1] = points[p][1] - 360
+            if azsun > 180 and points[p][1] < sslon: points[p][1] = points[p][1] + 360
+            points.append([get[0],get[1]])
+            td = zf.LLDist(get[0],get[1],sslat,sslon)[1]
+        del points[-1]
+        points.append([sslat,sslon])
+        # st.write(points)
+        folium.PolyLine(points, color='red').add_to(map)
+
         draw = plugins.Draw()
         draw.add_to(map)
         # display map

@@ -54,7 +54,7 @@ def app():
         
         ip = zf.MGRS2LL(ipmgrs)
         st.write('UTM :',ip[0])
-        st.write('Lat: ',str(round(ip[1],4)),' Lon: ',str(round(ip[2],4)))
+        st.write('Impact Point (LL): '+str(round(ip[1],5))+', '+str(round(ip[2],5)))
     with c2:
         # map
         map = folium.Map(location=[lp[1], lp[2]], zoom_start=10)

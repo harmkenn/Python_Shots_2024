@@ -75,8 +75,10 @@ def app():
     sub_cel = zf.vPolar(0,0,cel_azimuth,cel_dist*1000)
     st.write(f"{selection}'s Sub-Coordinates: (", str(sub_cel[0]), f",", str(sub_cel[1]), f') and ',zf.LL2MGRS(sub_cel[0],sub_cel[1])[1]  )
 
-    obloc = zf.vPolar(sub_cel[0],sub_cel[1],float(h_az),dist)
-    st.write(f"Observer's Coordinates: (", str(obloc[1]), f",", str(obloc[0]), f') and ',zf.LL2MGRS(obloc[1],obloc[0])[1]  )
+    
+    obloc = zf.revVpolar(sub_cel[0],sub_cel[1],float(h_az),dist)
+
+    st.write(f"Observer's Coordinates: (", str(obloc[0]), f",", str(obloc[1]), f') and ',zf.LL2MGRS(obloc[0],obloc[1])[1]  )
     st.write(f"Distance from Observer to Sun's Sub-Coordinates: ", str(dist), ' meters.')
     
     #st.write(f'here {selection} is: ', zf.sub_cel(selection))
@@ -84,8 +86,8 @@ def app():
     
     sslat = sub_cel[0]  
     sslon = sub_cel[1]
-    melat = obloc[1]
-    melon = obloc[0]     
+    melat = obloc[0]
+    melon = obloc[1]     
     # map
     map = folium.Map(location=[0, 0], zoom_start=1)
     # add tiles to map

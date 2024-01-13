@@ -49,13 +49,16 @@ def app():
         when = (setday.year,setday.month,setday.day,setday.hour,setday.minute,setday.second,0)
         location = (melat,melon)
         
-        st.write('azimuth to the sun: '+ str(zf.sunpos(when, location, True)[0]))
+        az2sun = zf.sunpos(when, location, True)[0]
+
+        st.write('azimuth to the sun: '+ str(az2sun))
         st.write('elevation to the sun: '+ str(zf.sunpos(when, location, True)[1]))
        
-    
+        if az2sun < 180 and sslon < yl[2]: sslon = sslon + 360
+        if az2sun > 180 and sslon > yl[2]: sslon = sslon - 360
         
         # map
-        map = folium.Map(location=[0, 0], zoom_start=1)
+        map = folium.Map(location=[sslat, (sslon+yl[2])/2], zoom_start=1)
         # add tiles to map
         attribution = "Map tiles by Google"
         folium.raster_layers.TileLayer('Open Street Map', attr=attribution).add_to(map)

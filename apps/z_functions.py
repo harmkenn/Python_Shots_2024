@@ -369,14 +369,15 @@ def vPolar(lat1d,lon1d,dird,dists):
     if lon2d < -180: lon2d = lon2d+360
     more = LLDist(lat1d,lon1d,lat2d,lon2d)
     iazd = more[3]
-    return [lat2d,lon2d,iazd]
+    return [lat2d,lon2d,dird,iazd]
 
 def revVpolar(lat2d,lon2d,lazd,distm):
     bazd = (lazd + 180)%360
-    est_bazd = bazd
+    taz = bazd
     for i in range(20):
-        est_lazd = (vPolar(lat2d , lon2d,est_bazd ,distm)[2]+180)%360
-        est_bazd = (est_bazd - (est_lazd-lazd))
-    lat1d = vPolar(lat2d , lon2d,est_bazd ,distm)[0]
-    lon1d = vPolar(lat2d , lon2d,est_bazd ,distm)[1]
-    return [lat1d,lon1d, est_bazd, est_lazd]
+        temp = vPolar(lat2d , lon2d,taz,distm)
+        taz = taz - (temp[3]-bazd)
+    lat1d = temp[0]
+    lon1d = temp[1]
+    liazr = (taz +180)%360
+    return [lat1d,lon1d, lazd, liazr]
