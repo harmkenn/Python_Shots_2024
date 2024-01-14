@@ -29,6 +29,7 @@ def app():
         h_time = st.text_input('UTC Time',h_time)
         st.session_state['h_time'] = h_time
         st.write(str(h_time)+'UTC')
+        
     with c2:
         st.markdown(f"Get the azimuth and altitude to {selection} from the observer's Location")
         ob_mgrs = st.text_input(f"Observer's MGRS Location: ", '32TPR9792346676')
@@ -83,8 +84,10 @@ def app():
     sslon = sub_cel[1]
     melat = ob_ll[1]
     melon = ob_ll[2]     
+    with c1:
+        st.write(f"{selection}'s sub-celestial location: ({sslat}, {sslon})")
     # map
-    map = folium.Map(location=[0, 0], zoom_start=1)
+    map = folium.Map(location=[0, sslon], zoom_start=1)
     # add tiles to map
     attribution = "Map tiles by Google"
     folium.raster_layers.TileLayer('Open Street Map', attr=attribution).add_to(map)
@@ -126,6 +129,9 @@ def app():
 
     # add full screen button to map
     plugins.Fullscreen(position='topright').add_to(map)
+
+    if azcel > 180 and melon < sslon: melon = melon + 360
+    if azcel < 180 and melon > sslon: melon = melon - 360
     
     # add marker to map https://fontawesome.com/v5.15/icons?d=gallery&p=2&m=free
     sun = folium.features.CustomIcon('Icons/target.png',icon_size=(30,30))
