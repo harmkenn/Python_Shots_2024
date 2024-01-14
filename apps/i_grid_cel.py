@@ -65,12 +65,16 @@ def app():
     
     now = ephem.now()
     cel.compute(origin)
+
+    azcel = cel.az*180/pi
     
     with c2:
-        st.write(f"Azimuth to {selection}: ",str(cel.az*180/pi))
+        st.write(f"Azimuth to {selection}: ",str(azcel))
         st.write(f"Altitude to {selection}: ",str(cel.alt*180/pi))
-
-    cel_dist = 40050*(90-cel.alt*180/pi)/360
+        cel_dist = 40050*(90-cel.alt*180/pi)/360
+        dist = round(cel_dist * 1000, 0)
+        st.write(f'Observer distance to Sub-Celestial location: {dist} meters.')
+    
     
     sub_cel = zf.vPolar(ob_ll[1],ob_ll[2],cel.az*180/pi,cel_dist*1000)
     
@@ -128,7 +132,23 @@ def app():
     folium.Marker(location=[sslat, sslon], color='green', tooltip='SubSolar Point',icon=sun).add_to(map)
     pal = folium.features.CustomIcon('Icons/paladin.jpg',icon_size=(30,20))
     folium.Marker(location=[melat, melon], color='green', tooltip='my location',icon=pal).add_to(map)
-    folium.PolyLine([[sslat, sslon],[melat,melon]],tooltip='Azimuth').add_to(map)
+
+    points = []
+    points.append([melat,melon])
+    td = azcel
+
+    
+    for p in range(0,1000):
+        get = zf.vPolar(points[p][0],points[p][1],td,dist/1000)
+        if azcel < 180 and points[p][1] > sslon: points[p][1] = points[p][1] - 360
+        if azcel > 180 and points[p][1] < sslon: points[p][1] = points[p][1] + 360
+        points.append([get[0],get[1]])
+        td = zf.LLDist(get[0],get[1],sslat,sslon)[1]
+    del points[-1]
+    points.append([sslat,sslon])
+    # st.write(points)
+    folium.PolyLine(points, color='red').add_to(map)
+
     draw = plugins.Draw()
     draw.add_to(map)
     # display map

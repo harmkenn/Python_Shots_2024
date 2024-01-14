@@ -32,7 +32,7 @@ def app():
         st.write(str(h_time)+'UTC')
     with c2:
         st.markdown(f'Get your position from your direction and altitude to {selection}.')
-        h_az = st.number_input(f'Azimuth degrees to {selection}: ', 0.00,360.00,45.00)
+        h_az = st.number_input(f'Azimuth degrees to {selection}: ', 0.00,360.00,110.00)
         h_alt = st.number_input(f'Altitude degrees to {selection}: ',-90.00,90.00,45.00)
 
     # https://theskylive.com/planetarium?obj=moon#ra|9.854204231576311|dec|32.20240956176751|fov|50
@@ -89,7 +89,7 @@ def app():
     melat = obloc[0]
     melon = obloc[1]     
     # map
-    map = folium.Map(location=[0, 0], zoom_start=1)
+    map = folium.Map(location=[0, sslon], zoom_start=1)
     # add tiles to map
     attribution = "Map tiles by Google"
     folium.raster_layers.TileLayer('Open Street Map', attr=attribution).add_to(map)
@@ -137,7 +137,21 @@ def app():
     folium.Marker(location=[sslat, sslon], color='green', tooltip='SubSolar Point',icon=sun).add_to(map)
     pal = folium.features.CustomIcon('Icons/paladin.jpg',icon_size=(30,20))
     folium.Marker(location=[melat, melon], color='green', tooltip='my location',icon=pal).add_to(map)
-    folium.PolyLine([[sslat, sslon],[melat,melon]],tooltip='Azimuth').add_to(map)
+
+    points = []
+    points.append([melat,melon])
+    td = h_az
+    for p in range(0,1000):
+        get = zf.vPolar(points[p][0],points[p][1],td,dist/1000)
+        if h_az < 180 and points[p][1] > sslon: points[p][1] = points[p][1] - 360
+        if h_az > 180 and points[p][1] < sslon: points[p][1] = points[p][1] + 360
+        points.append([get[0],get[1]])
+        td = zf.LLDist(get[0],get[1],sslat,sslon)[1]
+    del points[-1]
+    points.append([sslat,sslon])
+    # st.write(points)
+    folium.PolyLine(points, color='red').add_to(map)
+
     draw = plugins.Draw()
     draw.add_to(map)
     # display map

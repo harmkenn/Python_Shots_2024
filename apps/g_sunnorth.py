@@ -49,7 +49,8 @@ def app():
         when = (setday.year,setday.month,setday.day,setday.hour,setday.minute,setday.second,0)
         location = (melat,melon)
         
-        az2sun = zf.sunpos(when, location, True)[0]
+        dist = zf.LLDist(melat,melon,sslat,sslon)[0]
+        az2sun = zf.LLDist(melat,melon,sslat,sslon)[1]
 
         st.write('azimuth to the sun: '+ str(az2sun))
         st.write('elevation to the sun: '+ str(zf.sunpos(when, location, True)[1]))
@@ -106,7 +107,23 @@ def app():
         folium.Marker(location=[sslat, sslon], color='green', tooltip='SubSolar Point',icon=sun).add_to(map)
         pal = folium.features.CustomIcon('Icons/paladin.jpg',icon_size=(30,20))
         folium.Marker(location=[melat, melon], color='green', tooltip='my location',icon=pal).add_to(map)
-        folium.PolyLine([[sslat, sslon],[melat,melon]],tooltip='Azimuth').add_to(map)
+
+        points = []
+        points.append([yl[1],yl[2]])
+        td = az2sun
+
+        
+        for p in range(0,1000):
+            get = zf.vPolar(points[p][0],points[p][1],td,dist/1000)
+            if az2sun < 180 and points[p][1] > sslon: points[p][1] = points[p][1] - 360
+            if az2sun > 180 and points[p][1] < sslon: points[p][1] = points[p][1] + 360
+            points.append([get[0],get[1]])
+            td = zf.LLDist(get[0],get[1],sslat,sslon)[1]
+        del points[-1]
+        points.append([sslat,sslon])
+        # st.write(points)
+        folium.PolyLine(points, color='red').add_to(map)
+
         draw = plugins.Draw()
         draw.add_to(map)
         # display map
