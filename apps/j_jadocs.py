@@ -25,8 +25,8 @@ def app():
         st.session_state['a_ipmgrs'] = ipmgrs
       
         ip = zf.MGRS2LL(ipmgrs)
-        st.write('UTM :',ip[0])
-        st.write('Impact Point (LL): '+str(round(ip[1],5))+', '+str(round(ip[2],5)))
+        st.write('(LL): '+str(round(ip[1],3))+', '+str(round(ip[2],5)))
+
     with c2:
         # map
         map = folium.Map(location=[ip[1], ip[2]], zoom_start=10)
