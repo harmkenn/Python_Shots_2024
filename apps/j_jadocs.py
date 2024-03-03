@@ -6,6 +6,14 @@ from folium import plugins
 
 from apps import z_functions as zf
 
+# Function to read Excel file and extract sheet names
+def get_excel_sheets(file):
+    # Use pandas ExcelFile to read the Excel file
+    xls = pd.ExcelFile(file)
+    # Get the list of sheet names
+    sheet_names = xls.sheet_names
+    return sheet_names
+
 def app():
     # title of the app
     lu = st.sidebar.text_input('Lookup: ') 
@@ -26,6 +34,19 @@ def app():
       
         ip = zf.MGRS2LL(ipmgrs)
         st.write('(LL): '+str(round(ip[1],3))+', '+str(round(ip[2],5)))
+
+        # File uploader to allow users to upload an Excel file
+        uploaded_file = st.file_uploader("Upload Excel file", type=["xlsx", "xls"])
+        # If file is uploaded
+        if uploaded_file is not None:
+          
+            # Read Excel file and extract sheet names
+            sheet_names = get_excel_sheets(uploaded_file)
+            # Display list of sheet names
+            selected_sheet = st.selectbox("Select a sheet:", sheet_names)
+        else:
+            st.write("Upload an Excel file above.")
+
 
     with c2:
         # map
