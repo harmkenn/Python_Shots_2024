@@ -1,7 +1,7 @@
 import streamlit as st
 from multiapp import MultiApp
 from apps import z_functions as zf
-from apps import a_deflection,b_points,c_polar,d_afatds,e_physics,f_sungrid,g_sunnorth,h_celgrid,i_grid_cel  # import your app modules here
+from apps import a_deflection,b_points,c_polar,d_afatds,e_physics,f_sungrid,g_sunnorth,h_celgrid,i_grid_cel,j_jadocs  # import your app modules here
 st.set_page_config(layout="wide",)
 app = MultiApp()
 
@@ -19,6 +19,7 @@ app.add_app("Sun to Grid", f_sungrid.app)
 app.add_app("Grid to Sun", g_sunnorth.app)
 app.add_app("Celestial to Grid", h_celgrid.app)
 app.add_app("Grid to Celestial", i_grid_cel.app)
+app.add_app('JADOCS',j_jadocs.app)
 
 # The main app
 app.run()

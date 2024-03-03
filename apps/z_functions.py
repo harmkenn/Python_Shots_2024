@@ -5,8 +5,8 @@ import pandas as pd
 import requests
 import urllib.request
 import json
-import pygeodesy as pg
-import pyproj
+import ephem
+
 
 nd = pd.read_csv('data/northdes.csv')
 
@@ -256,9 +256,6 @@ def subsolar(utc):
     lo = (ra - st)*180/pi % 360
     lo = lo - 360 if lo > 180 else lo
     return [round(la, 6), round(lo, 6)]
-
-
-import ephem
 
 def sub_cel(cel_ob):
     observer = ephem.Observer()

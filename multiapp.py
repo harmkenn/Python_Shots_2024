@@ -39,7 +39,7 @@ class MultiApp:
         })
 
     def run(self):
-        st.sidebar.title("Python Shots v2024.2")
+        st.sidebar.title("Python Shots v2024.3")
         st.sidebar.subheader("by Ken Harmon")
         
         app = st.sidebar.radio(
