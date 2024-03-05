@@ -17,6 +17,7 @@ def get_excel_sheets(file):
 def app():
     # title of the app
     lu = st.sidebar.text_input('Lookup: ') 
+    go = 0
     if len(lu)>=3:
         where = zf.lookup(lu)
         st.sidebar.write(where[0])
@@ -52,12 +53,13 @@ def app():
                 selected_name_column = st.selectbox("Select Name column:", df.columns)
                 selected_description_column = st.selectbox("Select Description column:", df.columns)
                 selected_type_column = st.selectbox("Select Type column:", df.columns)
-                selected_location_column = st.selectbox("Select Location column:", df.columns)
-        
+                selected_lat_column = st.selectbox("Latitude:", df.columns)
+                selected_lon_column = st.selectbox("Longitude:", df.columns)
+                
                 if st.button("Process"):
                     # Create a new dataframe with selected columns
-                    add_df = df[[selected_name_column, selected_description_column, selected_type_column, selected_location_column]]
-        
+                    add_df = df[[selected_name_column, selected_description_column, selected_type_column, selected_lat_column, selected_lon_column]]
+                    go = 1
                     # Display the resulting dataframe
                     st.write(add_df)
         else:
@@ -116,10 +118,11 @@ def app():
         safe = folium.features.CustomIcon('Icons/safe.png',icon_size=(25,25))
 
         folium.Marker(location=[ip[1],ip[2]], color='green',popup=ipmgrs, tooltip='Impact Point',icon=tgt).add_to(map)
-        for index, row in add_df.iterrows():
+        if go == 1:
+            for index, row in add_df.iterrows():
 
 
-            folium.Marker(location=[ip[1],ip[2]], color='green',popup=ipmgrs, tooltip='Impact Point',icon=safe).add_to(map)
+                folium.Marker(location=[ip[1],ip[2]], color='green',popup=ipmgrs, tooltip='Impact Point',icon=safe).add_to(map)
         
 
         
