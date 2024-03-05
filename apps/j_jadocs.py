@@ -44,8 +44,25 @@ def app():
             sheet_names = get_excel_sheets(uploaded_file)
             # Display list of sheet names
             selected_sheet = st.selectbox("Select a sheet:", sheet_names)
+            if selected_sheet:
+                # Read selected sheet from Excel file into pandas dataframe
+                df = pd.read_excel(uploaded_file, sheet_name=selected_sheet)
+        
+                # Create dropdown boxes for selecting columns
+                selected_name_column = st.selectbox("Select Name column:", df.columns)
+                selected_description_column = st.selectbox("Select Description column:", df.columns)
+                selected_type_column = st.selectbox("Select Type column:", df.columns)
+                selected_location_column = st.selectbox("Select Location column:", df.columns)
+        
+                if st.button("Process"):
+                    # Create a new dataframe with selected columns
+                    selected_columns_df = df[[selected_name_column, selected_description_column, selected_type_column, selected_location_column]]
+        
+                    # Display the resulting dataframe
+                    st.write(selected_columns_df)
         else:
             st.write("Upload an Excel file above.")
+            
 
 
     with c2:
