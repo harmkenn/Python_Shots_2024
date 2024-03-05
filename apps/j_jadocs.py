@@ -56,10 +56,10 @@ def app():
         
                 if st.button("Process"):
                     # Create a new dataframe with selected columns
-                    selected_columns_df = df[[selected_name_column, selected_description_column, selected_type_column, selected_location_column]]
+                    add_df = df[[selected_name_column, selected_description_column, selected_type_column, selected_location_column]]
         
                     # Display the resulting dataframe
-                    st.write(selected_columns_df)
+                    st.write(add_df)
         else:
             st.write("Upload an Excel file above.")
             
@@ -113,9 +113,13 @@ def app():
         # add marker to map https://fontawesome.com/v5.15/icons?d=gallery&p=2&m=free
         pal = folium.features.CustomIcon('Icons/paladin.jpg',icon_size=(30,20))
         tgt = folium.features.CustomIcon('Icons/target.png',icon_size=(25,25))
+        safe = folium.features.CustomIcon('Icons/safe.png',icon_size=(25,25))
 
         folium.Marker(location=[ip[1],ip[2]], color='green',popup=ipmgrs, tooltip='Impact Point',icon=tgt).add_to(map)
+        for index, row in add_df.iterrows():
 
+
+            folium.Marker(location=[ip[1],ip[2]], color='green',popup=ipmgrs, tooltip='Impact Point',icon=safe).add_to(map)
         
 
         
