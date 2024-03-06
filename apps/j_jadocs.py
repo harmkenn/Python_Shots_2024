@@ -65,7 +65,7 @@ def app():
         else:
             st.write("Upload an Excel file above.")
             
-
+        add_df['dist'] = zf.LLDist(ip[1],ip[2],add_df['lat'],add_df['long'])[0]
 
     with c2:
         # map
@@ -118,15 +118,19 @@ def app():
         safe = folium.features.CustomIcon('Icons/safe.png',icon_size=(25,25))
 
         folium.Marker(location=[ip[1],ip[2]], color='green',popup=ipmgrs, tooltip='Impact Point',icon=tgt).add_to(map)
-        for i in range(2):
-        
-            folium.Marker(location=[add_df.iloc[i,3],add_df.iloc[i,4]], color='green',popup=add_df.iloc[i,1], tooltip=add_df.iloc[i,0],icon=safe).add_to(map)
+        add_df = add_df.dropna()
+        for index, row in add_df.iterrows():
+            folium.CircleMarker(location=[row['lat'], row['long']],tooltip=row['Facility Name'] ,radius=3, color='blue', fill=True, fill_color='blue').add_to(map)
+    
+    
         
         
         draw = plugins.Draw()
         draw.add_to(map)
         # display map
         folium_static(map) 
+
+        st.write(add_df.sort_values(by='dist'))
         
 
             
