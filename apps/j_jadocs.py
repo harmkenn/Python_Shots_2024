@@ -65,7 +65,7 @@ def app():
         else:
             st.write("Upload an Excel file above.")
             
-        add_df['dist'] = zf.LLDist(ip[1],ip[2],add_df['lat'],add_df['long'])[0]
+        add_df['dist'] = add_df.apply(lambda row: zf.LLDist(ip[1],ip[2],row['lat'], row['long'])[0], axis=1)
 
     with c2:
         # map
