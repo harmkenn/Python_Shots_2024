@@ -28,9 +28,9 @@ def app():
 
     c1,c2 = st.columns((1,2))
     with c1:
-        if 'a_ipmgrs' not in st.session_state: st.session_state['a_ipmgrs'] = '36JTM1996188760'
+        if 'a_ipmgrs' not in st.session_state: st.session_state['a_ipmgrs'] = '29RPR6518104660'
         ipmgrs = st.session_state['a_ipmgrs']
-        ipmgrs = st.text_input('Impact Point (MGRS):','36JTM1996188760')
+        ipmgrs = st.text_input('Impact Point (MGRS):','29RPR6518104660')
         st.session_state['a_ipmgrs'] = ipmgrs
       
         ip = zf.MGRS2LL(ipmgrs)
@@ -69,7 +69,7 @@ def app():
 
     with c2:
         # map
-        map = folium.Map(location=[ip[1], ip[2]], zoom_start=10)
+        map = folium.Map(location=[ip[1], ip[2]], zoom_start=5)
         # add tiles to map
         attribution = "Map tiles by Google"
         folium.raster_layers.TileLayer('Open Street Map', attr=attribution).add_to(map)
@@ -118,13 +118,15 @@ def app():
         safe = folium.features.CustomIcon('Icons/safe.png',icon_size=(25,25))
 
         folium.Marker(location=[ip[1],ip[2]], color='green',popup=ipmgrs, tooltip='Impact Point',icon=tgt).add_to(map)
-        if go == 1:
-            for index, row in add_df.iterrows():
-
-
-                folium.Marker(location=[ip[1],ip[2]], color='green',popup=ipmgrs, tooltip='Impact Point',icon=safe).add_to(map)
-        
-
+        # Iterate over the first 5 rows
+        for index,row in add_df.head(5).iterrows():
+            st.write(row)
+            # Create marker
+            folium.Marker(location=[row[3], row[4]], 
+                        color='green',
+                        popup=row,
+                        tooltip=row,
+                        icon=safe).add_to(map)
         
         
         draw = plugins.Draw()
