@@ -118,15 +118,9 @@ def app():
         safe = folium.features.CustomIcon('Icons/safe.png',icon_size=(25,25))
 
         folium.Marker(location=[ip[1],ip[2]], color='green',popup=ipmgrs, tooltip='Impact Point',icon=tgt).add_to(map)
-        # Iterate over the first 5 rows
-        for index,row in add_df.head(5).iterrows():
-            st.write(row)
-            # Create marker
-            folium.Marker(location=[row[3], row[4]], 
-                        color='green',
-                        popup=row,
-                        tooltip=row,
-                        icon=safe).add_to(map)
+        for i in range(2):
+        
+            folium.Marker(location=[add_df.iloc[i,3],add_df.iloc[i,4]], color='green',popup=add_df.iloc[i,1], tooltip=add_df.iloc[i,0],icon=safe).add_to(map)
         
         
         draw = plugins.Draw()
