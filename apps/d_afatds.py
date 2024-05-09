@@ -5,7 +5,7 @@ import pandas as pd
 import folium
 from streamlit_folium import folium_static
 from folium import plugins
-from numpy import log, pi, sin, arctan, cos, array, tan
+from numpy import log, pi, sin, arctan, cos, array, tan, sqrt
 from scipy.optimize import curve_fit
 import plotly.express as px
 from apps import z_functions as zf
@@ -140,7 +140,7 @@ def app():
             draw.add_to(map)
             # display map
             folium_static(map) 
-        with c3:
+
             rng = round(deets[0],0)
             chrg = st.selectbox('Charge:',['Auto','1L','2L','3H','4H','5H'])
             if chrg == 'Auto':
@@ -235,20 +235,7 @@ def app():
             mo = output[0,0] + int(d_lpalt) * .95
             
             
-                        
-            data = pd.DataFrame({'Range (Meters)':str(int(rng)),
-                                 'Shell':'M795','Charge':chrg, 'Muzzle Velocity (m/s)':str(round(macs['MV (m/s)'].mean(),1)),'Azimuth to Target (mils)':str(round(deets[1]*3200/180 - gdm,0)),
-                                 'Grid Declination (mils)':str(round(gdm,1)),'Drift (mils)':str(round(drift,1)),
-                                 'Deflection (mils)':str(round(defl,1)), 'QE (mils)':str(round(qe,1)),
-                                 'Time of Flight (sec)':str(round(tof,1)), 'Max Ord':str(int(mo))},
-                                index = ['Fire Mission']).T 
-                                
-                                
-                                 #'MaxOrd (Meters)':str(round(mo,0))
-                                 
-            st.dataframe(data,height=500) 
-           
-        with c2:
+
             # Define the cubic polynomial function
             def cubic_function(x, a, b, c, d):
                 return a * x**3 + b * x**2 + c * x + d
@@ -305,6 +292,27 @@ def app():
             
 
             st.write(tPoints)
+
+        with c3:
+            # Calculate the impact angle
+            dr = tPoints['Ranges'].iloc[-1]-tPoints['Ranges'].iloc[-2]
+            da = tPoints['Alts'].iloc[-1]-tPoints['Alts'].iloc[-2]
+            ia = arctan(da/dr)/pi*3200
+            tv = sqrt(dr**2+da**2)*300/223
+                        
+            data = pd.DataFrame({'Range (Meters)':str(int(rng)),
+                                 'Shell':'M795','Charge':chrg, 'Muzzle Velocity (m/s)':str(round(macs['MV (m/s)'].mean(),1)),'Azimuth to Target (mils)':str(round(deets[1]*3200/180 - gdm,0)),
+                                 'Grid Declination (mils)':str(round(gdm,1)),'Drift (mils)':str(round(drift,1)),
+                                 'Deflection (mils)':str(round(defl,1)), 'QE (mils)':str(round(qe,1)),
+                                 'Time of Flight (sec)':str(round(tof,1)), 'Max Ord (m)':str(int(mo)),
+                                 'Impact angle (mils)':str(int(ia)), 'Terminal Velocity (m/s)':str(int(tv))},
+                                index = ['Fire Mission']).T 
+                                
+                                
+                                 #'MaxOrd (Meters)':str(round(mo,0))
+                                 
+            st.dataframe(data,height=500) 
+           
         
  
             
